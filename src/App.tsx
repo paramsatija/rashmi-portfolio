@@ -115,11 +115,15 @@ function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
 
+  // Brand gradient colors (from your theme)
+  const ACCENT = "#FF3FA4";
+  const ACCENT2 = "#7C4DFF";
+
   const links = [
     { href: "/", label: "Home" },
     { href: "/about", label: "About" },
     { href: "/projects", label: "Projects & Programs" },
-    // NOTE: the route stays /awards, only the label changes:
+    // Route is still /awards; label updated per your request
     { href: "/awards", label: "Rewards & Recognitions" },
     { href: "/contact", label: "Contact", accent: true },
   ];
@@ -131,10 +135,14 @@ function SiteHeader() {
 
   return (
     <motion.header
-      initial={{ y: -24, opacity: 0 }}
+      initial={{ y: -18, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 160, damping: 18 }}
-      className="w-full sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-white/50"
+      transition={{ type: "spring", stiffness: 180, damping: 18, mass: 0.7 }}
+      className="w-full sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-white/60"
+      style={{
+        // faint top glow that matches your brand colors
+        boxShadow: `0 8px 24px ${ACCENT}14, 0 1px 0 ${ACCENT2}22 inset`,
+      }}
     >
       <nav className="mx-auto max-w-7xl px-4 h-16 flex items-center justify-between">
         {/* Brand / Logo */}
@@ -148,23 +156,38 @@ function SiteHeader() {
             <li key={l.href} className="relative">
               <Link
                 to={l.href}
-                className={`relative inline-flex items-center rounded-full px-3 py-1.5 transition hover:translate-y-[-1px]
-                  ${isActive(l.href) ? "text-white" : "text-black/80 hover:text-black"}`}
+                className="relative inline-flex items-center rounded-full px-3 py-1.5 transition will-change-transform hover:-translate-y-0.5"
               >
-                {/* Animated active pill */}
+                {/* Animated active pill — gradient + soft shadow */}
                 <AnimatePresence>
                   {isActive(l.href) && (
                     <motion.span
                       layoutId="navActive"
-                      className="absolute inset-0 -z-10 rounded-full bg-black/90 shadow-sm"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 320, damping: 28 }}
+                      className="absolute inset-0 -z-10 rounded-full"
+                      style={{
+                        background: `linear-gradient(90deg, ${ACCENT}, ${ACCENT2})`,
+                        boxShadow: `0 8px 20px ${ACCENT}33`,
+                      }}
                     />
                   )}
                 </AnimatePresence>
-                {l.label}
+
+                {/* Label with automatic contrast on active */}
+                <span
+                  className={
+                    isActive(l.href)
+                      ? "text-white font-semibold"
+                      : "text-black/80 hover:text-black"
+                  }
+                >
+                  {l.label}
+                </span>
               </Link>
             </li>
           ))}
+
           {/* Contact button (accent) */}
           <li>
             <Link
