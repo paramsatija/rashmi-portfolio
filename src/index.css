@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- Unified Design System (Code 2 structure, Code 1 colors) --- */
+
+@layer base {
+  :root {
+    /* Code 1 light palette */
+    --background: 0 36% 84%;   /* #e5c7c7 */
+    --foreground: 0 0% 9%;     /* #171717 */
+
+    --card: 0 36% 90%;         /* lighter pink-beige */
+    --card-foreground: 0 0% 9%;
+
+    --popover: 0 36% 90%;
+    --popover-foreground: 0 0% 9%;
+
+    --primary: 335 100% 62%;   /* pink accent #FF3FA4 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 276 100% 67%; /* lilac accent #7C4DFF */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 36% 80%;
+    --muted-foreground: 0 0% 25%;
+
+    --accent: 335 100% 62%;    /* same as primary */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 36% 70%;
+    --input: 0 36% 70%;
+    --ring: 335 100% 62%;
+
+    --radius: 1rem;
+
+    /* Brand tokens = mapped to Code 1 palette */
+    --brand-ink: #171717;
+    --brand-accent: #FF3FA4;
+    --brand-accent2: #7C4DFF;
+    --brand-cream: #FFF7EE;
+    --brand-blush: #FFE3F4;
+    --brand-petal: #FFD1E8;
+    --brand-lilac: #E7D1FF;
+  }
+
+  body {
+    font-family: "Arial", "Helvetica", sans-serif;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: "kern" 1, "liga" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html { scroll-behavior: smooth; }
+}
+
+/* Dark mode → Code 1’s dark colors */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: 0 0% 4%;     /* #0a0a0a */
+    --foreground: 0 0% 93%;    /* #ededed */
+
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 93%;
+
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 93%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+
+    --ring: 335 100% 62%;
+  }
+
+  body {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}
+
+/* --- Glass Effects --- */
+.glass {
+  position: relative;
+  border-radius: 1.5rem;
+  background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.65));
+  border: 1px solid rgba(255,255,255,.55);
+  box-shadow: 0 22px 60px rgba(23,23,23,.12), 0 2px 6px rgba(0,0,0,.04);
+  backdrop-filter: blur(14px) saturate(120%);
+}
+.glass-dark {
+  background: linear-gradient(180deg, rgba(23,23,23,.92), rgba(23,23,23,.78));
+  border: 1px solid rgba(255,255,255,.15);
+  box-shadow: 0 22px 60px rgba(0,0,0,.30), 0 2px 6px rgba(0,0,0,.12);
+}
+
+/* --- Fonts --- */
+.font-title { font-family: "Zilla Slab", serif; }
+.font-accent { font-family: "Pacifico", cursive; }
+.font-body { font-family: "Arial", "Helvetica", sans-serif; }
+
+/* --- Gradients in Code 1 palette --- */
+.gradient-text {
+  background: linear-gradient(135deg, #FF3FA4 0%, #7C4DFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.ink-shift {
+  background-image: linear-gradient(90deg, var(--brand-accent) 0%, var(--brand-accent2) 50%, var(--brand-accent) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: inkShift 7s linear infinite;
+}
+
+/* --- Buttons & Chips --- */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium shadow;
+  }
+  .btn-primary {
+    background: var(--brand-accent); color: #fff;
+  }
+  .btn-secondary {
+    background: var(--brand-accent2); color: #fff;
+  }
+  .btn-accent {
+    background: var(--brand-petal); color: var(--brand-ink);
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full bg-white/80 text-sm px-3 py-1 shadow;
+  }
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--brand-blush); }
+::-webkit-scrollbar-thumb { background: var(--brand-accent2); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: var(--brand-ink); }
+
+/* --- Selection --- */
+::selection { background-color: var(--brand-accent); color: #fff; }
+
+/* --- Animations (kept same) --- */
+@keyframes inkShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+/* Site container for centering and responsiveness */
+.site-container {
+  max-width: 72rem;        /* ~1152px, good for desktop readability */
+  margin-left: auto;       
+  margin-right: auto;      /* centers on wide screens */
+  padding-left: 1rem;      
+  padding-right: 1rem;     /* margin on small screens */
+}
