@@ -6,11 +6,12 @@ import {
   BrowserRouter,
   Routes,
   Route,
-  NavLink,
+  Link,
   useLocation,
   Outlet,
 } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Lenis from "lenis";
 
 /* -------------------- Pages -------------------- */
@@ -111,58 +112,113 @@ function Layout() {
 }
 
 function SiteHeader() {
-  const linkBase =
-    "inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm transition";
-  const active =
-    "bg-black/90 text-white shadow-sm";
-  const inactive =
-    "bg-white text-black/80 shadow hover:shadow-md";
+  const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
+
+  const links = [
+    { href: "/", label: "Home" },
+    { href: "/about", label: "About" },
+    { href: "/projects", label: "Projects & Programs" },
+    // NOTE: the route stays /awards, only the label changes:
+    { href: "/awards", label: "Rewards & Recognitions" },
+    { href: "/contact", label: "Contact", accent: true },
+  ];
+
+  const isActive = (href: string) =>
+    href === "/"
+      ? pathname === "/"
+      : pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <header className="sticky top-0 z-40 backdrop-blur bg-white/70 border-b border-black/5">
-      <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between">
-        <NavLink to="/" className="font-semibold tracking-wide">
-          MAPS • Rashmi Agarwal
-        </NavLink>
+    <motion.header
+      initial={{ y: -24, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 160, damping: 18 }}
+      className="w-full sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-white/50"
+    >
+      <nav className="mx-auto max-w-7xl px-4 h-16 flex items-center justify-between">
+        {/* Brand / Logo */}
+        <Link to="/" className="flex items-center gap-2">
+          <span className="font-title text-xl gradient-text">Rashmi Agarwal</span>
+        </Link>
 
-        <nav className="flex items-center gap-2">
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) => `${linkBase} ${isActive ? active : inactive}`}
-          >
-            Home
-          </NavLink>
-          <NavLink
-            to="/projects"
-            className={({ isActive }) => `${linkBase} ${isActive ? active : inactive}`}
-          >
-            Projects
-          </NavLink>
-          <NavLink
-            to="/awards"
-            className={({ isActive }) => `${linkBase} ${isActive ? active : inactive}`}
-            title="Impact & Recognition"
-          >
-            Impact
-          </NavLink>
-          <NavLink
-            to="/about"
-            className={({ isActive }) => `${linkBase} ${isActive ? active : inactive}`}
-          >
-            About
-          </NavLink>
-          <NavLink
-            to="/contact"
-            className={({ isActive }) => `${linkBase} ${isActive ? active : inactive}`}
-          >
-            Contact
-          </NavLink>
-        </nav>
+        {/* Desktop links */}
+        <ul className="hidden md:flex items-center gap-2">
+          {links.slice(0, -1).map((l) => (
+            <li key={l.href} className="relative">
+              <Link
+                to={l.href}
+                className={`relative inline-flex items-center rounded-full px-3 py-1.5 transition hover:translate-y-[-1px]
+                  ${isActive(l.href) ? "text-white" : "text-black/80 hover:text-black"}`}
+              >
+                {/* Animated active pill */}
+                <AnimatePresence>
+                  {isActive(l.href) && (
+                    <motion.span
+                      layoutId="navActive"
+                      className="absolute inset-0 -z-10 rounded-full bg-black/90 shadow-sm"
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                </AnimatePresence>
+                {l.label}
+              </Link>
+            </li>
+          ))}
+          {/* Contact button (accent) */}
+          <li>
+            <Link
+              to={links[links.length - 1].href}
+              className="btn btn-accent btn-magnetic"
+            >
+              {links[links.length - 1].label}
+            </Link>
+          </li>
+        </ul>
+
+        {/* Mobile menu button */}
+        <button
+          className="md:hidden chip"
+          onClick={() => setOpen((s) => !s)}
+          aria-label="Toggle menu"
+          aria-expanded={open}
+          aria-controls="mobile-menu"
+        >
+          Menu
+        </button>
+      </nav>
+
+      {/* Mobile drawer */}
+      <div
+        id="mobile-menu"
+        className={`md:hidden transition-[max-height,opacity] duration-300 ${
+          open ? "max-h-[420px] opacity-100" : "max-h-0 opacity-0"
+        } overflow-hidden`}
+      >
+        <div className="glass mx-4 mt-2 p-4">
+          <ul className="flex flex-col gap-3">
+            {links.map((l) => (
+              <li key={l.href}>
+                <Link
+                  to={l.href}
+                  onClick={() => setOpen(false)}
+                  className={`block ${
+                    l.accent
+                      ? "btn btn-accent w-full text-center"
+                      : `py-2 ${isActive(l.href) ? "gradient-text font-semibold" : ""}`
+                  }`}
+                >
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
-    </header>
+    </motion.header>
   );
 }
+
 
 function SiteFooter() {
   const year = new Date().getFullYear();

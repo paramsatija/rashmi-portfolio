@@ -6,45 +6,56 @@
 
 @layer base {
   :root {
-    /* Code 1 light palette */
-    --background: 0 36% 84%;   /* #e5c7c7 */
-    --foreground: 0 0% 9%;     /* #171717 */
+    /* Code 1 light palette mapped in HSL (from hex):
+       cream  #FFF7EE → hsl(32 100% 96.7%)
+       ink    #1F1A1D → hsl(324 9% 11.2%)
+       accent #FF3FA4 → hsl(328 100% 62.35%)
+       accent2#7C4DFF → hsl(256 100% 65.1%)
+       blush  #FFE3F4 → hsl(324 100% 94.51%)
+       petal  #FFD1E8 → hsl(330 100% 90.98%)
+       lilac  #E7D1FF → hsl(269 100% 90.98%)
+       mist   #F3EDFF → hsl(260 100% 96.47%)
+    */
 
-    --card: 0 36% 90%;         /* lighter pink-beige */
-    --card-foreground: 0 0% 9%;
+    --background: 32 100% 96.7%;       /* soft.cream */
+    --foreground: 324 9% 11.2%;        /* soft.ink */
 
-    --popover: 0 36% 90%;
-    --popover-foreground: 0 0% 9%;
+    --card: 32 100% 98%;               /* slightly lighter than cream */
+    --card-foreground: 324 9% 11.2%;
 
-    --primary: 335 100% 62%;   /* pink accent #FF3FA4 */
+    --popover: 32 100% 98%;
+    --popover-foreground: 324 9% 11.2%;
+
+    --primary: 328 100% 62.35%;        /* soft.accent */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 276 100% 67%; /* lilac accent #7C4DFF */
+    --secondary: 256 100% 65.1%;       /* soft.accent2 */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 36% 80%;
+    --muted: 260 100% 96.47%;          /* soft.mist */
     --muted-foreground: 0 0% 25%;
 
-    --accent: 335 100% 62%;    /* same as primary */
+    --accent: 328 100% 62.35%;         /* same as primary */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 36% 70%;
-    --input: 0 36% 70%;
-    --ring: 335 100% 62%;
+    --border: 324 30% 80%;             /* neutral tuned toward ink */
+    --input: 324 30% 80%;
+    --ring: 328 100% 62.35%;
 
     --radius: 1rem;
 
-    /* Brand tokens = mapped to Code 1 palette */
-    --brand-ink: #171717;
+    /* Brand tokens = Code 1 palette (hex for convenience) */
+    --brand-ink: #1F1A1D;
     --brand-accent: #FF3FA4;
     --brand-accent2: #7C4DFF;
     --brand-cream: #FFF7EE;
     --brand-blush: #FFE3F4;
     --brand-petal: #FFD1E8;
     --brand-lilac: #E7D1FF;
+    --brand-mist: #F3EDFF;
   }
 
   body {
@@ -60,11 +71,11 @@
   html { scroll-behavior: smooth; }
 }
 
-/* Dark mode → Code 1’s dark colors */
+/* Dark mode → neutral dark with accent ring preserved */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: 0 0% 4%;     /* #0a0a0a */
-    --foreground: 0 0% 93%;    /* #ededed */
+    --background: 0 0% 4%;      /* #0a0a0a */
+    --foreground: 0 0% 93%;     /* #ededed */
 
     --card: 0 0% 10%;
     --card-foreground: 0 0% 93%;
@@ -75,7 +86,7 @@
     --border: 0 0% 20%;
     --input: 0 0% 20%;
 
-    --ring: 335 100% 62%;
+    --ring: 328 100% 62.35%;    /* soft.accent */
   }
 
   body {
@@ -152,11 +163,12 @@
   0% { background-position: 0% 50%; }
   100% { background-position: 200% 50%; }
 }
+
 /* Site container for centering and responsiveness */
 .site-container {
-  max-width: 72rem;        /* ~1152px, good for desktop readability */
-  margin-left: auto;       
-  margin-right: auto;      /* centers on wide screens */
-  padding-left: 1rem;      
-  padding-right: 1rem;     /* margin on small screens */
+  max-width: 72rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }

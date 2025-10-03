@@ -18,7 +18,7 @@ const soft = {
   petal: "#FFD1E8",
   lilac: "#E7D1FF",
   cream: "#FFF7EE",
-  mist: "#edf9ffff",
+  mist: "#F3EDFF", // match About.tsx
   accent: "#FF3FA4",
   accent2: "#7C4DFF",
   ink: "#1F1A1D",
@@ -188,7 +188,10 @@ const AnimatedHero: React.FC = () => {
             className="mt-4 max-w-2xl text-lg"
             style={{
               color: "rgba(0,0,0,0.85)",
-              filter: nameHover ? "drop-shadow(0 6px 20px rgba(255,63,164,.25))" : "rgba(14, 17, 217, 0.25) drop-shadow(0 4px 6px)",
+              // use theme accents for shadow hues
+              filter: nameHover
+                ? `drop-shadow(0 6px 20px ${soft.accent}40)`
+                : `drop-shadow(0 4px 6px ${soft.accent2}40)`,
             }}
             animate={nameHover ? { scale: 1.3 } : { scale: 1 }}
             transition={{ type: "spring", stiffness: 160, damping: 14, mass: 0.6 }}
@@ -301,8 +304,8 @@ const OverviewSplit: React.FC = () => {
         className="absolute inset-0 -z-10"
         style={{
           background:
-            "radial-gradient(100% 100% at 50% 50%, #FFE3F4 0%, #FFD1E8 40%, #F3EDFF 75%, transparent 100%)",
-          backgroundColor: "#FFF7EE",
+            `radial-gradient(100% 100% at 50% 50%, ${soft.blush} 0%, ${soft.petal} 40%, ${soft.mist} 75%, transparent 100%)`,
+          backgroundColor: soft.cream,
         }}
       />
 
@@ -314,7 +317,7 @@ const OverviewSplit: React.FC = () => {
             aria-hidden
             className="pointer-events-none absolute inset-0 -z-10 rounded-3xl"
             style={{
-              background: "conic-gradient(from 0deg at 50% 50%, #FF3FA4, #7C4DFF, #FF3FA4)",
+              background: `conic-gradient(from 0deg at 50% 50%, ${soft.accent}, ${soft.accent2}, ${soft.accent})`,
               filter: "blur(18px)",
               opacity: 0.16,
             }}
@@ -327,7 +330,7 @@ const OverviewSplit: React.FC = () => {
             transition={{ duration: 0.5 }}
             className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-black/70 backdrop-blur-md"
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-[#FF3FA4]" />
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: soft.accent }} />
             Overview
           </motion.p>
 
@@ -338,7 +341,7 @@ const OverviewSplit: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="mt-2 text-3xl sm:text-4xl font-extrabold bg-[length:200%_100%] bg-clip-text text-transparent"
             style={{
-              backgroundImage: "linear-gradient(90deg, #FF3FA4 0%, #7C4DFF 50%, #FF3FA4 100%)",
+              backgroundImage: `linear-gradient(90deg, ${soft.accent} 0%, ${soft.accent2} 50%, ${soft.accent} 100%)`,
               WebkitTextStroke: "1px rgba(0,0,0,0.05)",
               animation: "inkShift 7s linear infinite",
             }}
@@ -355,7 +358,7 @@ const OverviewSplit: React.FC = () => {
               transition={{ duration: 0.5, delay: 0.05 }}
               className="rounded-2xl border border-white/30 bg-white/40 p-4 backdrop-blur-md"
             >
-              <h3 className="text-base font-semibold text-[#7C4DFF]">Cultural Entrepreneur</h3>
+              <h3 className="text-base font-semibold" style={{ color: soft.accent2 }}>Cultural Entrepreneur</h3>
               <p className="mt-1">
                 Rashmi Agarwal works at the crossroads of art, business, and social impact—treating culture as infrastructure
                 for connection, learning, and place-making.
@@ -368,7 +371,7 @@ const OverviewSplit: React.FC = () => {
               transition={{ duration: 0.5, delay: 0.12 }}
               className="rounded-2xl border border-white/30 bg-white/40 p-4 backdrop-blur-md"
             >
-              <h3 className="text-base font-semibold text-[#FF3FA4]">Founder of MAPS</h3>
+              <h3 className="text-base font-semibold" style={{ color: soft.accent }}>Founder of MAPS</h3>
               <p className="mt-1">
                 As Chairperson of MAPS International W.L.L., she builds programs spanning exhibitions, residencies, and international
                 collaborations—aligning museums, councils, and brands to measurable goals.
@@ -381,7 +384,7 @@ const OverviewSplit: React.FC = () => {
               transition={{ duration: 0.5, delay: 0.18 }}
               className="rounded-2xl border border-white/30 bg-white/40 p-4 backdrop-blur-md"
             >
-              <h3 className="text-base font-semibold text-[#7C4DFF]">Bridge Builder</h3>
+              <h3 className="text-base font-semibold" style={{ color: soft.accent2 }}>Bridge Builder</h3>
               <p className="mt-1">
                 She mentors emerging talent and women leaders, creates youth pipelines, and strengthens institutional capacity—shaping
                 sustainable platforms for cultural growth.
@@ -438,7 +441,7 @@ const OverviewSplit: React.FC = () => {
             className="pointer-events-none absolute -inset-4 -z-10 rounded-[28px] blur-2xl"
             style={{
               background:
-                "radial-gradient(60% 60% at 30% 30%, rgba(255,63,164,0.35), transparent), radial-gradient(60% 60% at 70% 70%, rgba(124,77,255,0.28), transparent)",
+                `radial-gradient(60% 60% at 30% 30%, ${soft.accent}59, transparent), radial-gradient(60% 60% at 70% 70%, ${soft.accent2}47, transparent)`,
             }}
           />
         </figure>
@@ -577,4 +580,3 @@ export default function Index() {
     </div>
   );
 }
-
