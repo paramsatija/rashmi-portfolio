@@ -53,7 +53,7 @@ export default function NGOPartnersPage() {
             <Link href="/impact#partners" className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm text-white" style={{ background: soft.accent2 }}>
               <ArrowLeft size={16} /> Back to Partnerships
             </Link>
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/85 px-3 py-1.5 text-sm shadow"><Users size={16} /> NGOs</span>
+            <span className="inline-flex items-center gap-2 rounded-full glass-white px-3 py-1.5 text-sm shadow"><Users size={16} /> NGOs</span>
           </div>
           <Title kicker="Government & institutional">NGO partners</Title>
           <p className="max-w-3xl text-black/75">
@@ -83,10 +83,10 @@ export default function NGOPartnersPage() {
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/impact/partners/government" className="rounded-full px-4 py-2 bg-white shadow hover-lift">
+            <Link href="/impact/partners/government" className="rounded-full px-4 py-2 glass-white shadow hover-lift">
               View Government
             </Link>
-            <Link href="/impact/partners/embassy" className="rounded-full px-4 py-2 bg-white shadow hover-lift">
+            <Link href="/impact/partners/embassy" className="rounded-full px-4 py-2 glass-white shadow hover-lift">
               View Embassies
             </Link>
             <Link href="/impact/partners/cultural" className="rounded-full px-4 py-2 text-white btn-magnetic" style={{ background: soft.accent }}>

@@ -1,610 +1,818 @@
-// src/pages/About.tsx
-import React, { useEffect } from "react";
+/**
+ * ABOUT PAGE — THE JOURNEY
+ * Vertical Scroll Timeline with smooth reveals
+ * Each chapter = fullscreen section with fade-in animations
+ * 
+ * CHAPTERS:
+ * 1. Origins - Early life, inspiration
+ * 2. Education - Study, foundation
+ * 3. QIAF Foundation - The big idea
+ * 4. Building Bridges - International expansion
+ * 5. Empowering Youth - Education initiatives
+ * 6. Signature Collaborations - Designer partnerships
+ * 7. Recognition - Awards, impact
+ * 8. Personal Philosophy - Vision, manifesto
+ */
+
+import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import {
+import { 
   motion,
-  useScroll,
-  useTransform,
-  type Transition,
+  useInView,
 } from "framer-motion";
-
-// import Nav from "@/components/Nav";
-import Footer from "@/components/Footer";
-import GradientBackground from "@/components/GradientBackground";
-import OvalBreak from "@/components/OvalBreak";
-
 import {
-  ArrowRight,
-  Award,
+  Sparkles,
   Heart,
-  Landmark,
-  Newspaper,
-  Rocket,
-  ShieldCheck,
-  Target,
-  Scale,
+  Palette,
+  Users,
   Globe,
+  Award,
+  Lightbulb,
+  TrendingUp,
+  BookOpen,
+  Briefcase,
+  Rocket,
 } from "lucide-react";
+import { tokens } from "@/lib/tokens";
 
-/* ----------------------------- theme ----------------------------- */
-const spring: Transition = { type: "spring", stiffness: 120, damping: 16, mass: 0.6 };
+/* ==========================================
+   TYPEWRITER TEXT COMPONENT
+   ========================================== */
+const TypewriterText: React.FC<{ text: string; delay?: number }> = ({ text, delay = 0 }) => {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [displayedText, setDisplayedText] = useState("");
 
-const soft = {
-  blush: "#FFE3F4",
-  petal: "#FFD1E8",
-  lilac: "#E7D1FF",
-  cream: "#FFF7EE",
-  mist:  "#F3EDFF",
-  ink:   "#1F1A1D",
-  accent:  "#FF3FA4",
-  accent2: "#7C4DFF",
-};
+  React.useEffect(() => {
+    if (!isInView) return;
+    
+    let i = 0;
+    const timeout = setTimeout(() => {
+      const interval = setInterval(() => {
+        if (i < text.length) {
+          setDisplayedText(text.slice(0, i + 1));
+          i++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 30);
+      return () => clearInterval(interval);
+    }, delay);
 
-/* ----------------------------- Reusable bits ----------------------------- */
-const Section: React.FC<{ id?: string; children: React.ReactNode; className?: string }> = ({ id, children, className }) => (
-  <section id={id} className={`mx-auto max-w-6xl px-4 ${className || ""}`}>{children}</section>
-);
-
-const Badge: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <span className="rounded-full bg-white/80 px-3 py-1 text-xs shadow">{children}</span>
-);
-
-/* Decorative break from Code 1 (kept for continuity) */
-const BigBreak: React.FC = () => {
-  const { scrollYProgress } = useScroll();
-  const s = useTransform(scrollYProgress, [0, 1], [0.85, 1.1]);
-  const r = useTransform(scrollYProgress, [0, 1], [0, 12]);
+    return () => clearTimeout(timeout);
+  }, [isInView, text, delay]);
 
   return (
-    <div className="relative my-20 h-56">
-      <motion.div
-        style={{ scale: s, rotate: r }}
-        className="absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full"
-      >
-        <div
-          className="h-full w-full rounded-full"
-          style={{
-            background: `radial-gradient(circle at 30% 30%, ${soft.accent}66, transparent 60%), ${soft.petal}`,
-            boxShadow: `0 30px 100px ${soft.accent}33`,
-          }}
-        />
-      </motion.div>
-    </div>
+    <p ref={ref} className="text-xl text-secondary leading-relaxed">
+      {displayedText}
+      {displayedText.length < text.length && (
+        <span className="inline-block w-1 h-6 bg-coral ml-1 animate-pulse" />
+      )}
+    </p>
   );
 };
 
-/* ----------------------------- Static content (from Code 2) ----------------------------- */
-const HERO = {
-  heading: "About Rashmi Agarwal",
-  subheading:
-    "Founder & President, MAPS International WLL • CEO, Qatar International Art Festival (QIAF)",
-  badges: [
-    "Entrepreneur",
-    "Founder",
-    "CEO, QIAF",
-    "Curator",
-    "Producer",
-    "Collector",
-    "Artist & Designer",
-  ],
-  pull_quote: {
-    text: "A Visionary at the Crossroads of Art, Business, and Social Impact",
-    attribution: "HuffMag Magazine, July 2025",
-    link:
-      "https://huffmag.com/rashmi-agarwal-a-visionary-at-the-crossroads-of-art-business-and-social-impact-2/",
-  },
+/* ==========================================
+   CHAPTER COMPONENT
+   ========================================== */
+interface ChapterProps {
+  chapter: number;
+  title: string;
+  icon: React.ElementType;
+  text: string;
+  image: string;
+  color: string;
+}
+
+const Chapter: React.FC<ChapterProps> = ({ chapter, title, icon: Icon, text, image, color }) => {
+  return (
+    <motion.div
+      className="w-full h-full flex items-center justify-center px-8 lg:px-16"
+      initial={{ opacity: 0, y: 60 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+        {/* LEFT: Image */}
+      <motion.div
+          className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl"
+          initial={{ opacity: 0, x: -60 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          <img
+            src={image}
+            alt={title}
+            className="w-full h-full object-cover"
+          />
+          
+          {/* Gradient overlay */}
+          <div
+            className="absolute inset-0"
+          style={{
+              background: `linear-gradient(135deg, ${color}20 0%, transparent 60%)`,
+            }}
+          />
+
+          {/* Chapter number */}
+          <div className="absolute top-8 left-8">
+            <div className="glass rounded-2xl px-4 py-2">
+              <span className="text-6xl font-bold" style={{ color }}>
+                {chapter}
+              </span>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* RIGHT: Content */}
+        <motion.div
+          className="space-y-6"
+          initial={{ opacity: 0, x: 60 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className="p-3 rounded-2xl"
+              style={{ backgroundColor: `${color}20` }}
+            >
+              <Icon className="w-6 h-6" style={{ color }} />
+            </div>
+            <span className="text-sm font-semibold text-tertiary uppercase tracking-wider">
+              Chapter {chapter}
+            </span>
+          </div>
+
+          <h2 className="text-5xl font-bold leading-tight" style={{ color }}>
+            {title}
+          </h2>
+
+          <TypewriterText text={text} delay={600} />
+
+          <motion.div
+            className="pt-4"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: 1.5 }}
+          >
+            <div className="w-16 h-1 rounded-full" style={{ backgroundColor: color }} />
+          </motion.div>
+      </motion.div>
+    </div>
+            </motion.div>
+  );
 };
 
-const BIO = {
-  paragraphs: [
-    "Rashmi Agarwal is a pioneering entrepreneur and strategic leader with over 20 years of experience driving innovation, cultural engagement, and social impact in the fine arts industry.",
-    "At MAPS International WLL and QIAF, she has been instrumental in elevating the region's art landscape, creating platforms that empower emerging voices and foster meaningful global cultural dialogue.",
-    "Her blend of curation, strategic planning, finance, and management bridges the worlds of art and business. Through collaborations with government bodies, cultural institutions, dignitaries, and global organizations, she amplifies art’s impact for positive social change.",
-  ],
-  highlights: [
-    "400+ artists connected from 70+ countries",
-    "150+ transformative events",
-    "5,000+ young leaders empowered",
-  ],
-};
-
-const VISION = {
-  left: [
-    "Rashmi Agarwal’s vision is to create platforms that unite people across cultural and geographical boundaries, celebrating the universal language of art. Through MAPS International WLL and QIAF, she fosters collaborations that transcend borders and empower the next generation of artists.",
-    "She is especially passionate about nurturing emerging talent and educational opportunities that help creators learn, grow, and thrive.",
-  ],
-  right: {
-    paragraphs: [
-      "She envisions a world where education and art intersect to inspire innovation and cultural dialogue, giving future artists a global stage. Through these efforts, she aims to shape a future where creativity and learning create lasting impact.",
-    ],
-    stats: [
-      { value: "100+", label: "Nationalities United" },
-      { value: "QIAF", label: "Global Festival" },
-      { value: "MAPS", label: "International WLL" },
-    ],
-  },
-};
-
-const EXPERTISE = [
-  {
-    icon: <Globe className="w-7 h-7 text-accent-500" />,
-    heading: "Cultural Curation",
-    subtext: "20+ years of curating transformative cultural experiences",
-  },
-  {
-    icon: <Scale className="w-7 h-7 text-accent-500" />,
-    heading: "Strategic Planning",
-    subtext: "Bridging art and business through innovative strategies",
-  },
-  {
-    icon: <ShieldCheck className="w-7 h-7 text-accent-500" />,
-    heading: "Global Leadership",
-    subtext: "Leading international organizations and cultural diplomacy",
-  },
-  {
-    icon: <Heart className="w-7 h-7 text-accent-500" />,
-    heading: "Social Impact",
-    subtext: "Driving positive change through art and cultural engagement",
-  },
-];
-
-const LEADERSHIP = [
-  {
-    group: "International Organizations",
-    items: [
-      {
-        role: "Chairperson & International Director",
-        org: "Human Rights International Federation",
-        location: "India",
-        period: "2019–present",
-        notes: "Leading global human rights advocacy and policy development",
-      },
-      {
-        role: "International Director & National Chairperson",
-        org: "Anti-Corruption Foundation",
-        location: "Qatar",
-        period: "2018–present",
-        notes: "Championing transparency and ethical governance",
-      },
-      {
-        role: "Board Member",
-        org: "Silk Painters International",
-        location: "USA",
-        period: "—",
-        notes: "Supporting global artistic excellence and cultural exchange",
-      },
-    ],
-  },
-  {
-    group: "Arts & Media",
-    items: [
-      {
-        role: "Proprietor",
-        org: "Oyster Silk Art Gallery",
-        location: "—",
-        period: "Since 2006",
-        notes:
-          "Curating and promoting contemporary art and cultural heritage",
-      },
-    ],
-  },
-];
-
-/* ----------------------------- Page ----------------------------- */
-export default function About() {
-  useEffect(() => {
-    document.title = "About — Rashmi Agarwal";
-  }, []);
+/* ==========================================
+   DESIGNER SHOWCASE (Flip Cards)
+   ========================================== */
+const DesignerShowcase: React.FC = () => {
+  const designers = [
+    { name: "Abu Jani", specialty: "Couture Master", img: "https://i.postimg.cc/Y0bzNYNd/image.png" },
+    { name: "Sandeep Khosla", specialty: "Design Visionary", img: "https://i.postimg.cc/sgn4GYf1/image.png" },
+    { name: "Manish Malhotra", specialty: "Fashion Icon", img: "https://i.postimg.cc/YSkbQrYP/image.png" },
+    { name: "Tarun Tahiliani", specialty: "Contemporary Elegance", img: "https://i.postimg.cc/g0FkD52H/image.png" },
+    { name: "Ritu Kumar", specialty: "Heritage Couture", img: "https://i.postimg.cc/x1jWS3FM/image.png" },
+    { name: "JJ Valaya", specialty: "Royal Grandeur", img: "https://thearableader.com/wp-content/uploads/2025/08/Jihane-Arfaoui-42-1536x819.jpg" },
+  ];
 
   return (
-    <div className="min-h-screen" style={{ background: soft.cream }}>
-      {/* <Nav /> */}
+    <section className="py-20 bg-gradient-to-b from-mist to-canvas">
+      <div className="max-w-7xl mx-auto px-8">
+                <motion.div 
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+        >
+          <h2 className="text-5xl font-bold gradient-text mb-4">
+            Signature Designer Collaborations
+          </h2>
+          <p className="text-xl text-secondary">
+            Partnering with India's finest to showcase excellence
+          </p>
+          </motion.div>
 
-      {/* soft layered background (from Code 1) */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 -left-20 h-[60vh] w-[60vh] rounded-full blur-3xl" style={{ background: soft.blush, opacity: 0.5 }} />
-        <div className="absolute -bottom-32 -right-24 h-[55vh] w-[55vh] rounded-full blur-3xl" style={{ background: soft.lilac, opacity: 0.45 }} />
-      </div>
-
-      {/* HERO — merged content */}
-      <Section className="pt-24 pb-10">
-        <div className="grid gap-10 md:grid-cols-[1.3fr_1fr] items-center">
-          <div>
-            <motion.h1
-              className="leading-tight text-5xl sm:text-6xl lg:text-7xl gradient-text"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={spring}
-            >
-              {HERO.heading}
-            </motion.h1>
-
-            <motion.p
-              className="mt-5 max-w-2xl text-lg text-black/80"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ ...spring, delay: 0.08 }}
-            >
-              {HERO.subheading}
-            </motion.p>
-
-            {/* badges union (Code 1 + Code 2 -> de-duped) */}
-            <div className="mt-4 flex flex-wrap gap-2">
-              {Array.from(new Set([
-                "Entrepreneur",
-                "Founder",
-                "Curator",
-                "Producer",
-                "Collector",
-                "Artist & Designer",
-                ...HERO.badges,
-              ])).map((t) => (
-                <Badge key={t}>{t}</Badge>
-              ))}
-            </div>
-
-            {/* pull quote (from Code 2) */}
-            <a
-              href={HERO.pull_quote.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="glass px-4 py-3 rounded-xl inline-flex items-start gap-3 mt-6 hover-lift"
-            >
-              <Newspaper className="w-5 h-5 text-accent-500 mt-0.5" />
-              <div>
-                <p className="text-sm italic leading-snug">“{HERO.pull_quote.text}”</p>
-                <p className="text-xs text-ink/60 mt-1">— {HERO.pull_quote.attribution}</p>
-              </div>
-            </a>
-
-            {/* CTAs union (normalize to your routes) */}
-            <div className="mt-8 flex gap-3">
-              <Link to="/" className="rounded-full px-4 py-2 text-white shadow btn-magnetic" style={{ background: soft.accent }}>
-                ← Back home
-              </Link>
-              <Link to="/impact" className="rounded-full px-4 py-2 shadow hover-scale" style={{ background: "white" }}>
-                Impact & Recognition
-              </Link>
-            </div>
-          </div>
-
-          {/* Portrait with glow (Next/Image → <img/>) */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          {designers.map((designer, i) => (
           <motion.div
-            className="relative mx-auto"
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={spring}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-accent-500/30 to-sky-300/30 blur-3xl rounded-3xl" />
-            <img
-              src="https://i.postimg.cc/x1jWS3FM/image.png"
-              alt="Rashmi Agarwal portrait"
-              className="relative h-auto w-full max-w-[420px] rounded-[28px] object-cover shadow-2xl ring-4 border-white"
-              loading="lazy"
-            />
-            <div
-              className="pointer-events-none absolute -inset-4 -z-10 rounded-[36px] blur-2xl"
-              style={{
-                background: `radial-gradient(600px circle at 30% 20%, ${soft.accent}33, transparent),
-                             radial-gradient(600px circle at 80% 70%, ${soft.accent2}33, transparent)`,
+              key={designer.name}
+              className="group perspective-container"
+              initial={{ opacity: 0, rotateY: 90 }}
+              whileInView={{ opacity: 1, rotateY: 0 }}
+              transition={{
+                delay: i * 0.1,
+                duration: 0.6,
+                type: "spring",
               }}
-            />
-          </motion.div>
-        </div>
-      </Section>
-
-      {/* BREAK 1 */}
-      <OvalBreak src="https://i.postimg.cc/qRpDH8L8/image.png" alt="Rashmi portrait" />
-
-      {/* BIO (from Code 2) */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-title font-bold mb-6 gradient-text">Biography</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="md:col-span-2 space-y-4">
-              {BIO.paragraphs.map((p, i) => (
-                <p key={i} className="text-ink/80 leading-relaxed">{p}</p>
-              ))}
-            </div>
-            <div className="space-y-3">
-              {BIO.highlights.map((h) => (
-                <div key={h} className="glass p-4 text-sm">{h}</div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* VISION & MISSION (merged) */}
-      <Section id="vision">
-        <motion.h2
-          className="text-3xl font-semibold gradient-text"
-          initial={{ x: -12, opacity: 0 }}
-          whileInView={{ x: 0, opacity: 1 }}
-          transition={spring}
-          viewport={{ once: true }}
-        >
-          Vision & Mission
-        </motion.h2>
-
-        <div className="mt-6 grid gap-8 md:grid-cols-2">
-          <motion.div
-            className="rounded-3xl bg-white/80 p-6 shadow glass"
-            initial={{ y: 20, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={spring}
-            viewport={{ once: true }}
-          >
-            <Target className="w-7 h-7 text-accent-500 mb-3" />
-            {VISION.left.map((p, i) => (
-              <p key={i} className="text-black/80 mb-4">{p}</p>
-            ))}
-          </motion.div>
-
-          <motion.div
-            className="rounded-3xl bg-white/80 p-6 shadow glass"
-            initial={{ y: 20, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ ...spring, delay: 0.05 }}
-            viewport={{ once: true }}
-          >
-            <Heart className="w-7 h-7 text-accent-500 mb-3" />
-            {VISION.right.paragraphs.map((p, i) => (
-              <p key={i} className="text-black/80 mb-4">{p}</p>
-            ))}
-            <div className="mt-4 grid grid-cols-3 items-center gap-4 text-center">
-              {VISION.right.stats.map((s) => (
-                <div key={s.label} className="rounded-2xl bg-white p-4 shadow">
-                  <div className="text-3xl font-semibold gradient-text">{s.value}</div>
-                  <div className="text-xs text-black/60">{s.label}</div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </Section>
-
-      {/* BREAK 2 */}
-      <OvalBreak src="https://i.postimg.cc/CKFVPVbS/image.png" alt="Rashmi portrait" />
-
-      {/* VOLUNTEER EXPERIENCE (from Code 1) */}
-      <Section id="volunteer">
-        <motion.h2
-          className="text-3xl font-semibold"
-          style={{ color: soft.ink }}
-          initial={{ x: -12, opacity: 0 }}
-          whileInView={{ x: 0, opacity: 1 }}
-          transition={spring}
-          viewport={{ once: true }}
-        >
-          Volunteer Experience
-        </motion.h2>
-
-        <div className="mt-6 grid gap-6 md:grid-cols-2">
-          {[
-            {
-              title:
-                "Chairperson (Qatar) & International Director — Human Rights International Federation (2019–present) – Registered by the Indian Trust Act (Govt. of India)",
-              color: soft.accent,
-            },
-            {
-              title:
-                "International Director & Chairperson (Qatar) — Anti-Corruption Foundation of India (2018–present) – Registered by the Indian Trust Act (Govt. of India)",
-              color: soft.accent2,
-            },
-          ].map((item, i) => (
-            <motion.article
-              key={i}
-              className="rounded-3xl bg-white/80 p-6 shadow"
-              initial={{ y: 24, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              transition={{ ...spring, delay: i * 0.04 }}
               viewport={{ once: true }}
             >
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 shrink-0 rounded-full" style={{ background: item.color }} />
-                <p className="text-black/80">{item.title}</p>
+              <div className="relative aspect-square rounded-2xl overflow-hidden glass shadow-lg hover:shadow-2xl transition-all duration-500 group-hover:scale-105">
+                {/* 📸 PLACEHOLDER: Designer Photos */}
+                <img
+                  src={designer.img}
+                  alt={designer.name}
+                  className="w-full h-full object-cover"
+                />
+                
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                    <h3 className="font-bold text-sm mb-1">{designer.name}</h3>
+                    <p className="text-xs opacity-80">{designer.specialty}</p>
+                  </div>
+                </div>
               </div>
-            </motion.article>
+            </motion.div>
           ))}
         </div>
-      </Section>
 
-      {/* EXPERTISE & LEADERSHIP CARDS (from Code 2) */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-title font-bold mb-8 gradient-text">
-            Expertise & Leadership
-          </h2>
-          <div className="grid md:grid-cols-4 gap-6">
-            {EXPERTISE.map((e) => (
-              <div key={e.heading} className="glass p-6">
-                <div className="mb-2">{e.icon}</div>
-                <h3 className="font-semibold mb-1">{e.heading}</h3>
-                <p className="text-sm text-ink/70">{e.subtext}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* BREAK 3 */}
-      <OvalBreak src="https://i.postimg.cc/267G0PFN/image.png" alt="Bespoke design details" />
-
-      {/* SIGNATURE DESIGNER ENGAGEMENTS (from Code 1) */}
-      <Section id="designer">
-        <motion.h2
-          className="text-3xl font-semibold"
-          style={{ color: soft.ink }}
-          initial={{ x: -12, opacity: 0 }}
-          whileInView={{ x: 0, opacity: 1 }}
-          transition={spring}
-          viewport={{ once: true }}
+        {/* Note for missing images */}
+              <motion.div 
+          className="mt-12 glass rounded-2xl p-6 border-2 border-dashed border-coral/30"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
         >
-          Signature Designer Engagements
-        </motion.h2>
-
-        <div className="mt-6 grid gap-8 lg:grid-cols-[1.2fr_1fr]">
-          <motion.div
-            className="rounded-3xl bg-white/80 p-6 shadow"
-            initial={{ y: 24, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={spring}
-            viewport={{ once: true }}
-          >
-            <p className="text-black/80">
-              Artistic fashion designer based in Qatar, known for bespoke creations blending artistry with couture craftsmanship. With a deep appreciation for individuality, her
-              designs transcend trends, offering timeless elegance tailored exclusively to each client’s distinct
-              personality and preferences.
-            </p>
-            <p className="mt-4 text-black/80">
-              Every piece is a testament to meticulous attention to detail, where luxurious fabrics,
-              intricate embellishments, and masterful silhouettes come together to form wearable art.
-            </p>
-            <p className="mt-4 text-black/80">
-              By-commission engagements deliver one-of-a-kind pieces that reflect the client’s story and aspirations.
-              Handcrafted techniques, sustainable luxury, and personalized detailing turn ideas into collector’s pieces.
-            </p>
-
-            <div className="mt-6 flex flex-wrap gap-2">
-              {["Bespoke scarves", "Embroidery", "Cultural fusion", "Sustainable luxury", "Collector’s pieces"].map(
-                (t) => (
-                  <Badge key={t}>{t}</Badge>
-                )
-              )}
-            </div>
-
-            <div className="mt-7">
-              <Link to="/contact" className="rounded-full px-4 py-2 text-white shadow" style={{ background: soft.accent }}>
-                Commission an engagement
-              </Link>
-            </div>
-          </motion.div>
-
-          {/* Visual side: animated collage with real images (from Code 1/2) */}
-          <motion.div
-            className="relative overflow-hidden rounded-3xl shadow-xl"
-            initial={{ scale: 0.98, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={spring}
-            viewport={{ once: true }}
-          >
-            <div
-              className="absolute inset-0"
-              style={{ background: `linear-gradient(135deg, ${soft.accent}33, ${soft.accent2}22)` }}
-            />
-            <div className="grid grid-cols-2 gap-2 p-2 relative z-10">
-              {[
-                "https://thearableader.com/wp-content/uploads/2025/08/Jihane-Arfaoui-42-1536x819.jpg",
-                "https://i.postimg.cc/g0FkD52H/image.png",
-                "https://i.postimg.cc/YSkbQrYP/image.png",
-                "https://i.postimg.cc/Y0bzNYNd/image.png",
-                "https://i.postimg.cc/sgn4GYf1/image.png",
-                "https://i.postimg.cc/x1jWS3FM/image.png",
-              ].map((src, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ y: 16, opacity: 0 }}
-                  whileInView={{ y: 0, opacity: 1 }}
-                  transition={{ ...spring, delay: 0.05 * i }}
-                  viewport={{ once: true }}
-                >
-                  <img
-                    src={src}
-                    alt={`About collage image ${i + 1}`}
-                    className="aspect-[4/3] w-full rounded-2xl object-cover shadow-md"
-                    loading="lazy"
-                  />
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </Section>
-
-      {/* RECOGNITION (from Code 2) */}
-      <section id="recognition" className="py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-title font-bold mb-6 gradient-text">
-            Featured Recognition
-          </h2>
-
-          <div className="grid md:grid-cols-3 gap-4 mb-8">
-            {[
-              { outlet: "Gulf Times", type: "International Media", link: "#" },
-              { outlet: "Qatar News Agency", type: "International Media", link: "#" },
-              { outlet: "Al Raya", type: "International Media", link: "#" },
-              { outlet: "Al Jazeera", type: "International Media", link: "#" },
-              { outlet: "Qatar TV", type: "International Media", link: "#" },
-              { outlet: "The Peninsula", type: "International Media", link: "#" },
-            ].map((r) => (
-              <a key={r.outlet} href={r.link} className="glass p-5 hover-lift">
-                <div className="flex items-center gap-2 mb-1">
-                  <Newspaper className="w-5 h-5 text-accent-500" />
-                  <span className="font-semibold">{r.outlet}</span>
-                </div>
-                <div className="text-xs text-ink/60">{r.type}</div>
-              </a>
-            ))}
-          </div>
-
-          <div className="glass p-6 flex items-start gap-3">
-            <Rocket className="w-6 h-6 text-accent-500 mt-0.5" />
+          <div className="flex items-start gap-4">
+            <Palette className="w-6 h-6 text-coral flex-shrink-0 mt-1" />
             <div>
-              <div className="font-semibold">Space Program Recognition</div>
-              <p className="text-sm text-ink/80">
-                Al Thuraya Planetarium, Katara Cultural Village — pioneering space science education and youth engagement.
+              <p className="text-sm text-secondary">
+                <strong className="text-coral">📸 Designer Photos Needed:</strong> Professional headshots of each signature designer (500x500px, square crop). 
+                Will create individual cards with hover effects showcasing your collaborations.
               </p>
             </div>
           </div>
+        </motion.div>
+        </div>
+      </section>
+  );
+};
+
+/* ==========================================
+   MAIN ABOUT COMPONENT
+   ========================================== */
+export default function About() {
+  const chapters = [
+    {
+      chapter: 1,
+      title: "Origins",
+      icon: Sparkles,
+      text: "Born with a passion for art and culture, Rashmi's journey began in the vibrant cultural landscape of Mumbai. From an early age, she was captivated by the power of art to bridge communities and tell stories that transcend boundaries.",
+      image: "https://i.postimg.cc/x1jWS3FM/image.png", // 📸 PLACEHOLDER: Young Rashmi or family photo
+      color: tokens.colors.coral.base,
+    },
+    {
+      chapter: 2,
+      title: "Education & Foundation",
+      icon: BookOpen,
+      text: "Formal training in cultural management and arts administration laid the groundwork. Each course, mentor, and experience shaped a vision: to create platforms where art becomes a catalyst for dialogue, understanding, and social change.",
+      image: "https://i.postimg.cc/g0FkD52H/image.png", // 📸 PLACEHOLDER: University or early career photo
+      color: tokens.colors.sky.base,
+    },
+    {
+      chapter: 3,
+      title: "QIAF Foundation",
+      icon: Palette,
+      text: "The Qatar International Art Festival was born from a simple yet powerful idea: bring together artists from around the world to celebrate cultural diversity. What started as a vision in 2018 has grown into one of the region's most prestigious art platforms.",
+      image: "https://i.postimg.cc/fbdJVkXn/image.png", // 📸 PLACEHOLDER: First QIAF event
+      color: tokens.colors.amber.base,
+    },
+    {
+      chapter: 4,
+      title: "Building Bridges",
+      icon: Globe,
+      text: "Cultural diplomacy became the cornerstone. Through partnerships with embassies, governments, and international institutions across 25+ countries, QIAF transformed into more than an art festival—it became a platform for global dialogue.",
+      image: "https://i.postimg.cc/d3qwvxTh/image.png", // Embassy events
+      color: "#9B59B6",
+    },
+    {
+      chapter: 5,
+      title: "Empowering Youth",
+      icon: Users,
+      text: "The next generation became the focus. Youth programs, hackathons, and mentorship initiatives were launched to ensure that young leaders have the tools, confidence, and networks to drive cultural and technological innovation.",
+      image: "https://i.postimg.cc/CKFVPVbS/image.png", // Youth programs
+      color: "#E74C3C",
+    },
+    {
+      chapter: 6,
+      title: "Signature Collaborations",
+      icon: Heart,
+      text: "Partnering with India's finest designers—Abu Jani, Sandeep Khosla, Manish Malhotra, and more—created a unique fusion of fashion and art. These collaborations showcased how traditional craftsmanship meets contemporary vision.",
+      image: "https://i.postimg.cc/YSkbQrYP/image.png", // 📸 PLACEHOLDER: Designer collaboration photo
+      color: "#16A085",
+    },
+    {
+      chapter: 7,
+      title: "Recognition & Impact",
+      icon: Award,
+      text: "Awards and media features followed—not as an end goal, but as validation of the mission. Recognition from Gulf Business, HuffMag, and cultural institutions across the Arab world reflected the ripple effect of this work.",
+      image: "https://i.postimg.cc/YCZk2V3C/image.png", // 📸 PLACEHOLDER: Award ceremony
+      color: "#F39C12",
+    },
+    {
+      chapter: 8,
+      title: "Personal Philosophy",
+      icon: Lightbulb,
+      text: "At the core is a simple belief: art is not decoration—it's transformation. Every exhibition, program, and partnership is designed to spark conversations, challenge perspectives, and create lasting change. This is just the beginning.",
+      image: "https://thearableader.com/wp-content/uploads/2025/08/Jihane-Arfaoui-42-1536x819.jpg", // Featured media
+      color: "#8E44AD",
+    },
+  ];
+
+  return (
+    <main className="relative bg-canvas overflow-hidden">
+      {/* BOLD HERO SECTION */}
+      <section className="relative min-h-screen flex items-center py-20 overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0">
+          {[...Array(3)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-96 h-96 rounded-full blur-3xl opacity-20"
+              style={{
+                background: `radial-gradient(circle, ${
+                  i === 0 ? tokens.colors.coral.base : i === 1 ? tokens.colors.sky.base : tokens.colors.amber.base
+                }, transparent)`,
+                left: `${i * 40}%`,
+                top: `${20 + i * 20}%`,
+              }}
+              animate={{
+                x: [0, 50, 0],
+                y: [0, -30, 0],
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                duration: 8 + i * 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-8 w-full">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* LEFT: Bold Statement */}
+            <motion.div
+              className="space-y-8"
+              initial={{ opacity: 0, x: -60 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1 }}
+            >
+              {/* Badge */}
+              <motion.div
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-coral/30"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3, type: "spring" }}
+              >
+                <Heart className="w-4 h-4 text-coral" />
+                <span className="text-sm font-semibold text-coral">The Journey</span>
+              </motion.div>
+
+              {/* Main headline */}
+              <h1 className="text-6xl lg:text-7xl font-bold leading-tight">
+                <span className="block gradient-text mb-3">From Law & Finance</span>
+                <span className="block gradient-text mb-3">to Cultural Visionary</span>
+                <span className="block gradient-text">Redefining Qatar's Arts Scene</span>
+              </h1>
+
+              {/* Quote */}
+              <motion.blockquote
+                className="border-l-4 border-coral pl-6 py-4 italic text-xl text-secondary"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                "Art itself is a healing force. Art is an ultimate form of meditation."
+              </motion.blockquote>
+
+              {/* Quick roles */}
+              <div className="space-y-3">
+                {[
+                  { role: "CEO & Founder", org: "Qatar International Art Festival" },
+                  { role: "Founder & President", org: "MAPS International WLL" },
+                  { role: "Board Director", org: "Silk Painters International, USA" },
+                  { role: "Chairperson (Qatar)", org: "Human Rights International Federation" },
+                ].map((item, i) => (
+                  <motion.div
+                    key={item.org}
+                    className="flex items-start gap-3"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.7 + i * 0.1 }}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-coral mt-2 flex-shrink-0" />
+                    <div>
+                      <span className="font-semibold text-primary">{item.role}</span>
+                      <br />
+                      <span className="text-sm text-secondary">{item.org}</span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* CTA Buttons */}
+              <motion.div
+                className="flex items-center gap-4 pt-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.1 }}
+              >
+                <Link to="/projects" className="btn btn-primary">
+                  Explore Work
+                </Link>
+                <Link to="/awards" className="btn btn-ghost">
+                  Recognition
+                </Link>
+              </motion.div>
+            </motion.div>
+
+            {/* RIGHT: Featured Image */}
+            <motion.div
+              className="relative"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, delay: 0.4 }}
+            >
+              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl">
+                <img
+                  src="https://i.postimg.cc/x1jWS3FM/image.png"
+                  alt="Rashmi Agarwal"
+                  className="w-full h-full object-cover"
+                />
+                
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                
+                {/* Featured stats */}
+                <div className="absolute bottom-8 left-8 right-8">
+                  <motion.div
+                    className="glass-frosted rounded-2xl p-6"
+                    initial={{ y: 40, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 1 }}
+                  >
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div>
+                        <div className="text-3xl font-bold text-white">15+</div>
+                        <div className="text-xs text-white/70 mt-1">Years</div>
+                      </div>
+                      <div>
+                        <div className="text-3xl font-bold text-white">100+</div>
+                        <div className="text-xs text-white/70 mt-1">Nationalities</div>
+                      </div>
+                      <div>
+                        <div className="text-3xl font-bold text-white">70+</div>
+                        <div className="text-xs text-white/70 mt-1">Countries</div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Decorative brandy break (optional visual) */}
-      <OvalBreak src="https://i.postimg.cc/267G0PFN/image.png" alt="Bespoke design details" />
+      {/* Vertical Timeline - Each chapter scrolls in smoothly */}
+      <section className="bg-gradient-to-b from-mist to-canvas py-20">
+        <div className="max-w-4xl mx-auto px-8 mb-16 text-center">
+          <h2 className="text-5xl font-bold gradient-text mb-4">
+            The Journey in 8 Chapters
+          </h2>
+          <p className="text-xl text-secondary">
+            From Mumbai to Qatar: Building bridges through art when the world needed them most
+          </p>
+        </div>
+        {chapters.map((chapter) => (
+          <div key={chapter.chapter} className="min-h-screen">
+            <Chapter {...chapter} />
+          </div>
+        ))}
+      </section>
 
-      {/* FINAL CTA (merged wording) */}
-      <Section className="pb-24">
-        <div className="grid items-center gap-6 rounded-3xl bg-white/80 p-8 shadow md:grid-cols-[1.2fr_1fr]">
-          <div>
-            <h3 className="text-2xl font-semibold" style={{ color: soft.ink }}>
-              Continue exploring
-            </h3>
-            <p className="mt-2 text-black/70">
-              Discover flagship programs and measurable outcomes, or get in touch to collaborate.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Link to="/projects" className="rounded-full px-4 py-2 text-white shadow" style={{ background: soft.accent }}>
-                Explore Projects & Programs
-              </Link>
-              <Link to="/impact" className="rounded-full px-4 py-2 shadow" style={{ background: "white" }}>
-                Impact & Recognition
-              </Link>
-              <Link to="/contact" className="rounded-full px-4 py-2 text-white shadow" style={{ background: soft.accent2 }}>
-                Contact
-              </Link>
+      {/* Designer Showcase */}
+      <DesignerShowcase />
+
+      {/* Bio Section */}
+      <section className="py-20 bg-gradient-to-b from-mist to-canvas">
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="grid lg:grid-cols-3 gap-12">
+            <div className="lg:col-span-2 space-y-6">
+            <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-5xl font-bold gradient-text mb-6">About Rashmi</h2>
+                <div className="space-y-4 text-lg text-secondary leading-relaxed">
+                  <p>
+                    Rashmi Agarwal is the visionary founder and president of MAPS International WLL, Qatar's premier cultural bridge-building organization. Born with a passion for cultural diplomacy and international collaboration, Rashmi has dedicated over 11 years to transforming Qatar's cultural landscape through innovative programming and strategic partnerships.
+                  </p>
+                  <p>
+                    Her journey began in 2014 when she recognized the need for a platform that could connect Qatar with the world through art and culture. Starting with local art workshops and summer camps, Rashmi's vision evolved into creating Qatar's most successful international cultural festival, QIAF, which now attracts 400+ artists from 70+ countries annually.
+                  </p>
+                  <p>
+                    The turning point came in 2019 when QIAF's 2nd edition brought together 232 artists from 64 countries, establishing Qatar as a major player in international cultural diplomacy. This success led to government endorsement, partnerships with Katara Cultural Village, and recognition as one of the world's most celebrated art gatherings.
+                  </p>
+                  <p>
+                    Today, Rashmi's vision extends beyond art festivals to encompass youth development, space science education, and comprehensive cultural bridge-building. Her work directly supports Qatar National Vision 2030, creating lasting impact through education, innovation, and international collaboration.
+                  </p>
+                </div>
+            </motion.div>
+            </div>
+
+            {/* Milestones Sidebar */}
+            <div className="space-y-4">
+              {[
+                { year: "2014", label: "MAPS International Founded", icon: Sparkles },
+                { year: "2019", label: "QIAF International Breakthrough", icon: Globe },
+                { year: "2021", label: "UNESCO Partnership", icon: Award },
+                { year: "2024", label: "KSSP Launch", icon: Rocket },
+                { year: "2025", label: "QIAF 7th Edition", icon: TrendingUp },
+              ].map((milestone, i) => (
+                <motion.div 
+                  key={milestone.year}
+                  className="bento-card p-6"
+                  initial={{ opacity: 0, x: 40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  whileHover={{ x: -4 }}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-coral/20 to-sky/20 flex items-center justify-center flex-shrink-0">
+                      <milestone.icon className="w-6 h-6 text-coral" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold gradient-text">{milestone.year}</div>
+                      <div className="text-sm text-secondary mt-1">{milestone.label}</div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
-          <div className="relative h-36 overflow-hidden rounded-2xl">
-            <motion.div
-              className="absolute inset-0"
-              initial={{ x: 0 }}
-              animate={{ x: "-50%" }}
-              transition={{ repeat: Infinity, duration: 24, ease: "linear" }}
-              style={{
-                backgroundImage:
-                  "repeating-linear-gradient(90deg, rgba(0,0,0,0.06) 0 2px, transparent 2px 24px)",
-              }}
-            />
+        </div>
+      </section>
+
+      {/* Core Expertise Section */}
+      <section className="py-20 bg-gradient-to-b from-canvas to-mist">
+        <div className="max-w-7xl mx-auto px-8">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-5xl font-bold gradient-text mb-4">
+              Core Expertise
+            </h2>
+            <p className="text-xl text-secondary">
+              Building cultural impact through strategic excellence
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                icon: Globe,
+                title: "International Cultural Diplomacy",
+                desc: "Building bridges between 70+ countries through art and cultural exchange",
+                color: tokens.colors.coral.base,
+              },
+              {
+                icon: Briefcase,
+                title: "Strategic Partnership Development",
+                desc: "Government and institutional partnerships with Katara, British Council, NASA",
+                color: tokens.colors.sky.base,
+              },
+              {
+                icon: Lightbulb,
+                title: "Educational Program Innovation",
+                desc: "Creating cutting-edge programs like KSSP and The YOUTH platform",
+                color: tokens.colors.amber.base,
+              },
+              {
+                icon: Award,
+                title: "Event Management Excellence",
+                desc: "Delivering world-class cultural festivals with 11+ years proven success",
+                color: "#9B59B6",
+              },
+              {
+                icon: Users,
+                title: "Youth Development Leadership",
+                desc: "Empowering Qatar's next generation through comprehensive initiatives",
+                color: "#E74C3C",
+              },
+              {
+                icon: BookOpen,
+                title: "Government Relations",
+                desc: "Maintaining strong partnerships with Qatar government entities",
+                color: "#16A085",
+              },
+              {
+                icon: Sparkles,
+                title: "Media & Communications",
+                desc: "Managing comprehensive press coverage across 8+ Qatar publications",
+                color: "#F39C12",
+              },
+              {
+                icon: Heart,
+                title: "Cultural Tourism Development",
+                desc: "Contributing to Qatar's tourism strategy through cultural programming",
+                color: "#3498DB",
+              },
+            ].map((expertise, i) => (
+              <motion.div
+                key={expertise.title}
+                className="bento-card p-8 text-center group"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ y: -8, scale: 1.02 }}
+              >
+                <div
+                  className="w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12"
+                  style={{ backgroundColor: `${expertise.color}20` }}
+                >
+                  <expertise.icon className="w-8 h-8" style={{ color: expertise.color }} />
+                  </div>
+                <h3 className="text-xl font-bold text-primary mb-3">{expertise.title}</h3>
+                <p className="text-sm text-secondary leading-relaxed">{expertise.desc}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
+      </section>
 
-        <footer className="mx-auto max-w-6xl px-4 py-10 text-sm text-black/60">
-          © {new Date().getFullYear()} Rashmi Agarwal — All rights reserved.
-        </footer>
-      </Section>
+      {/* Personal Philosophy Section */}
+      <section className="py-20 bg-slate-900 text-white relative overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0 opacity-20">
+          {[...Array(3)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-96 h-96 rounded-full blur-3xl"
+              style={{
+                background: `radial-gradient(circle, ${
+                  i === 0 ? tokens.colors.coral.base : i === 1 ? tokens.colors.sky.base : tokens.colors.amber.base
+                }, transparent)`,
+                left: `${i * 35}%`,
+                top: `${20 + i * 15}%`,
+              }}
+              animate={{
+                x: [0, 50, 0],
+                y: [0, -30, 0],
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                duration: 8 + i * 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
+        </div>
 
-      <Footer />
+        <div className="max-w-6xl mx-auto px-8 relative z-10">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-5xl font-bold mb-4">
+              Guiding Principles
+            </h2>
+            <p className="text-xl text-white/70">
+              The values that shape every initiative and partnership
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {[
+              {
+                number: "01",
+                title: "Mapping Possibilities, Building Impact",
+                desc: "Every initiative must create measurable positive change. We don't just organize events—we build lasting platforms for cultural transformation and social progress.",
+                color: tokens.colors.coral.base,
+              },
+              {
+                number: "02",
+                title: "Cultural Bridge-Building",
+                desc: "Art and culture are the universal languages that connect humanity. Through exhibitions, programs, and partnerships, we create spaces where diverse voices find common ground.",
+                color: tokens.colors.sky.base,
+              },
+              {
+                number: "03",
+                title: "Youth Empowerment",
+                desc: "Investing in young people today creates tomorrow's leaders. Our programs provide tools, networks, and confidence for the next generation to drive innovation.",
+                color: tokens.colors.amber.base,
+              },
+              {
+                number: "04",
+                title: "International Collaboration",
+                desc: "Global partnerships amplify local impact. By connecting 70+ countries, we demonstrate that collaboration—not competition—builds sustainable cultural development.",
+                color: "#9B59B6",
+              },
+              {
+                number: "05",
+                title: "Innovation Through Tradition",
+                desc: "Honoring cultural heritage while embracing modern innovation. We preserve what matters while creating new forms of expression for contemporary audiences.",
+                color: "#16A085",
+              },
+            ].map((principle, i) => (
+              <motion.div 
+                key={principle.number}
+                className="glass-frosted p-8 rounded-3xl relative overflow-hidden group"
+                initial={{ opacity: 0, x: i % 2 === 0 ? -40 : 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.15 }}
+                whileHover={{ scale: 1.02, y: -4 }}
+              >
+                <div className="absolute top-0 right-0 text-8xl font-bold opacity-5">
+                  {principle.number}
+                </div>
+                <div className="relative z-10">
+                  <div
+                    className="text-6xl font-bold mb-4 opacity-50"
+                    style={{ color: principle.color }}
+                  >
+                    {principle.number}
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4" style={{ color: principle.color }}>
+                    {principle.title}
+                  </h3>
+                  <p className="text-white/70 leading-relaxed">{principle.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-b from-canvas to-mist">
+        <div className="max-w-4xl mx-auto px-8 text-center">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+          >
+            <h2 className="text-5xl font-bold gradient-text mb-6">
+              Let's Write the Next Chapter
+            </h2>
+            <p className="text-xl text-secondary mb-12">
+              Every partnership, project, and program is an opportunity to create impact.
+            </p>
+
+            <div className="flex items-center justify-center gap-4 flex-wrap">
+              <Link to="/projects" className="btn btn-primary">
+                Explore Projects
+                    </Link>
+              <Link to="/contact" className="btn btn-ghost">
+                Start a Conversation
+                    </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Image placeholders note */}
+      <section className="py-12 bg-mist">
+        <div className="max-w-4xl mx-auto px-8">
+          <div className="glass rounded-3xl p-8 border-2 border-dashed border-sky/30">
+            <h3 className="text-xl font-bold text-primary mb-4 flex items-center gap-3">
+              <Briefcase className="w-6 h-6 text-sky" />
+              📸 Images Needed for Timeline
+            </h3>
+            <ul className="space-y-2 text-sm text-secondary">
+              <li className="flex items-start gap-2">
+                <span className="text-coral mt-1">•</span>
+                <span><strong>Chapter 1:</strong> Young Rashmi or family photo (origin story)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-coral mt-1">•</span>
+                <span><strong>Chapter 2:</strong> University/early career photo</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-coral mt-1">•</span>
+                <span><strong>Chapter 3:</strong> First QIAF event (2018-2019)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-coral mt-1">•</span>
+                <span><strong>Chapter 7:</strong> Award ceremony moments</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-coral mt-1">•</span>
+                <span><strong>Designers:</strong> 6 headshots (Abu Jani, Sandeep Khosla, Manish Malhotra, Tarun Tahiliani, Ritu Kumar, JJ Valaya)</span>
+              </li>
+            </ul>
+          </div>
     </div>
+      </section>
+    </main>
   );
 }

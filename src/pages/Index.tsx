@@ -1,582 +1,721 @@
-// src/pages/Index.tsx
-import React from "react";
+/**
+ * HOMEPAGE — THE BOLD STATEMENT
+ * 3-Act Structure | Content-Rich | Impact-Driven
+ * 
+ * ACT 1: HERO — Bold statement + Trust bar + Featured QIAF image
+ * ACT 2: IMPACT — Stats cascade + Rich project grid with real content
+ * ACT 3: INVITATION — Strong CTA to start conversations
+ */
+
+import React, { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   motion,
-  useScroll,
-  useTransform,
-  useInView,
   useMotionValue,
   animate,
-  type Transition,
+  useSpring,
+  useInView,
 } from "framer-motion";
-import OvalBreak from "@/components/OvalBreak";
+import { 
+  Sparkles, 
+  Award, 
+  Users, 
+  Globe, 
+  ArrowRight,
+  Heart,
+  TrendingUp,
+  Building2,
+  Rocket,
+} from "lucide-react";
+import { tokens } from "@/lib/tokens";
 
-/* ----------------------------- theme ----------------------------- */
-const soft = {
-  blush: "#FFE3F4",
-  petal: "#FFD1E8",
-  lilac: "#E7D1FF",
-  cream: "#FFF7EE",
-  mist: "#F3EDFF", // match About.tsx
-  accent: "#FF3FA4",
-  accent2: "#7C4DFF",
-  ink: "#1F1A1D",
-};
+/* ==========================================
+   ANIMATED NUMBER COUNTER
+   ========================================== */
+const AnimatedNumber: React.FC<{ 
+  value: number; 
+  suffix?: string;
+  prefix?: string;
+  duration?: number;
+}> = ({ value, suffix = "", prefix = "", duration = 2 }) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  const motionValue = useMotionValue(0);
+  const springValue = useSpring(motionValue, { 
+    damping: 30, 
+    stiffness: 100,
+    mass: 1,
+  });
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-const spring: Transition = { type: "spring", stiffness: 120, damping: 16, mass: 0.6 };
+  useEffect(() => {
+    if (isInView) {
+      animate(motionValue, value, { 
+        duration, 
+        ease: [0.16, 1, 0.3, 1],
+      });
+    }
+  }, [isInView, value, duration, motionValue]);
 
-/* ----------------------------- helpers ----------------------------- */
-const GradientBackground: React.FC = () => (
-  <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-    <div className="absolute -top-40 -left-20 h-[60vh] w-[60vh] rounded-full blur-3xl" style={{ background: soft.blush, opacity: 0.55 }} />
-    <div className="absolute -bottom-32 -right-24 h-[55vh] w-[55vh] rounded-full blur-3xl" style={{ background: soft.lilac, opacity: 0.5 }} />
-    <div className="absolute top-1/3 left-1/3 h-[40vh] w-[40vh] rounded-full blur-3xl" style={{ background: soft.petal, opacity: 0.4 }} />
-    <div className="absolute inset-0" style={{ background: soft.cream, opacity: 0.72 }} />
-  </div>
-);
-
-const Preloader: React.FC = () => {
-  const [done, setDone] = React.useState(false);
-  React.useEffect(() => {
-    const t = setTimeout(() => setDone(true), 650);
-    return () => clearTimeout(t);
-  }, []);
-  if (done) return null;
-  return (
-    <motion.div className="fixed inset-0 z-[70] grid place-items-center" style={{ background: soft.cream }}>
-      <motion.div
-        initial={{ rotate: 0 }}
-        animate={{ rotate: 360 }}
-        transition={{ repeat: Infinity, ease: "linear", duration: 1.4 }}
-        className="grid h-24 w-24 place-items-center rounded-full"
-        style={{ border: `3px solid ${soft.accent}` }}
-      >
-        <span className="text-sm" style={{ color: soft.ink }}>loading</span>
-      </motion.div>
-    </motion.div>
-  );
-};
-
-const RotatingTextBadge: React.FC<{ text: string }> = ({ text }) => {
-  const id = "circlePath";
-  return (
-    <div className="mx-auto grid h-48 w-48 place-items-center">
-      <div className="relative h-40 w-40">
-        <svg viewBox="0 0 200 200" className="absolute inset-0">
-          <defs>
-            <path id={id} d="M100,100 m-70,0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0" />
-          </defs>
-          <motion.text
-            initial={{ rotate: 20 }}
-            animate={{ rotate: 380 }}
-            transition={{ repeat: Infinity, ease: "linear", duration: 18 }}
-            className="text-[12px] tracking-[2px]"
-            fill={soft.ink}
-          >
-            <textPath xlinkHref={`#${id}`} startOffset="0%">{text.repeat(3)}</textPath>
-          </motion.text>
-        </svg>
-        <div className="absolute inset-8 rounded-full" style={{ background: "white" }} />
-      </div>
-    </div>
-  );
-};
-
-/** Animated number counter (Vite-safe) */
-const AnimatedNumber: React.FC<{ value: number; suffix?: string; duration?: number }> = ({ value, suffix = "", duration = 1.8 }) => {
-  const ref = React.useRef<HTMLSpanElement | null>(null);
-  const start = useMotionValue(0);
-  const isInViewRef = React.useRef<HTMLDivElement | null>(null);
-  const inView = useInView(isInViewRef, { once: true, margin: "0px 0px -20% 0px" });
-
-  React.useEffect(() => {
-    if (inView) animate(start, value, { duration, ease: "easeOut" });
-  }, [inView, value, duration, start]);
-
-  React.useEffect(() => {
-    const unsub = start.on("change", (v) => {
-      if (ref.current) ref.current.textContent = Math.floor(v).toString();
-    });
-    return () => unsub();
-  }, [start]);
-
-  return (
-    <div ref={isInViewRef}>
-      <span ref={ref} />{suffix}
-    </div>
-  );
-};
-
-const NameDance: React.FC<{ text: string; accentGradient?: boolean }> = ({ text, accentGradient = false }) => {
-  const [hovered, setHovered] = React.useState(false);
-  const letters = Array.from(text);
-
-  return (
-    <span
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="inline-block cursor-default"
-      style={
-        accentGradient
-          ? {
-              WebkitTextStroke: "1px rgba(0,0,0,0.04)",
-              backgroundImage: `linear-gradient(90deg, ${soft.accent} 0%, ${soft.accent2} 50%, ${soft.accent} 100%)`,
-              backgroundSize: "200% 100%",
-              WebkitBackgroundClip: "text",
-              color: "transparent",
-            }
-          : { color: soft.ink }
+  useEffect(() => {
+    const unsubscribe = springValue.on("change", (latest) => {
+      if (ref.current) {
+        ref.current.textContent = `${prefix}${Math.round(latest)}${suffix}`;
       }
-    >
-      {letters.map((ch, i) => (
-        <motion.span
-          key={`${ch}-${i}`}
-          style={{ display: "inline-block" }}
-          animate={
-            hovered
-              ? {
-                  y: [-2, -14, 0, -8, 0],
-                  rotate: [0, -6, 0, 6, 0],
-                  transition: {
-                    duration: 0.9,
-                    delay: i * 0.035,
-                    repeat: Infinity,
-                    repeatDelay: 0.5,
-                    ease: "easeInOut",
-                  },
-                }
-              : { y: 0, rotate: 0, transition: { duration: 0.25 } }
-          }
-        >
-          {ch}
-        </motion.span>
-      ))}
-    </span>
-  );
+    });
+    return unsubscribe;
+  }, [springValue, prefix, suffix]);
+
+  return <span ref={ref}>0</span>;
 };
 
-/* ----------------------------- sections ----------------------------- */
-const AnimatedHero: React.FC = () => {
-  const { scrollY } = useScroll();
-  const blobY1 = useTransform(scrollY, [0, 300], [0, -20]);
-  const blobY2 = useTransform(scrollY, [0, 300], [0, 24]);
-  const [nameHover, setNameHover] = React.useState(false);
-
+/* ==========================================
+   ACT 1: THE HERO
+   Bold statement + Trust bar + QIAF featured image
+   ========================================== */
+const Act1Hero: React.FC = () => {
   return (
-    <section className="relative mx-auto max-w-6xl px-4">
-      {/* floating gradient blobs behind hero */}
-      <motion.div className="pointer-events-none absolute -left-16 -top-24 h-56 w-56 rounded-full blur-3xl" style={{ background: soft.petal, opacity: 0.7, y: blobY1 }} />
-      <motion.div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full blur-3xl" style={{ background: soft.lilac, opacity: 0.6, y: blobY2 }} />
-
-      <div className="grid items-center gap-10 lg:grid-cols-[1.6fr_1fr]">
-        {/* LEFT: Name + roles + CTAs */}
-        <div>
-          <motion.h1
-            className="leading-[0.95] text-5xl sm:text-6xl lg:text-7xl"
-            initial={{ y: 22, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={spring}
-            onMouseEnter={() => setNameHover(true)}
-            onMouseLeave={() => setNameHover(false)}
-          >
-            <NameDance text="Rashmi " />
-            <NameDance text="Agarwal" accentGradient />
-          </motion.h1>
-
-          <motion.p
-            className="mt-4 max-w-2xl text-lg"
-            style={{
-              color: "rgba(0,0,0,0.85)",
-              // use theme accents for shadow hues
-              filter: nameHover
-                ? `drop-shadow(0 6px 20px ${soft.accent}40)`
-                : `drop-shadow(0 4px 6px ${soft.accent2}40)`,
+    <section className="relative min-h-screen flex items-center py-20 overflow-hidden">
+      {/* Animated gradient background */}
+      <div className="absolute inset-0">
+        {[...Array(3)].map((_, i) => (
+      <motion.div
+            key={i}
+            className="absolute w-96 h-96 rounded-full blur-3xl opacity-20"
+          style={{
+              background: `radial-gradient(circle, ${
+                i === 0 ? tokens.colors.coral.base : i === 1 ? tokens.colors.sky.base : tokens.colors.amber.base
+              }, transparent)`,
+              left: `${i * 40}%`,
+              top: `${20 + i * 20}%`,
             }}
-            animate={nameHover ? { scale: 1.3 } : { scale: 1 }}
-            transition={{ type: "spring", stiffness: 160, damping: 14, mass: 0.6 }}
+          animate={{
+              x: [0, 50, 0],
+              y: [0, -30, 0],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+              duration: 8 + i * 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          />
+        ))}
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-8 w-full">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          {/* LEFT: Bold Statement */}
+      <motion.div
+            className="space-y-8"
+            initial={{ opacity: 0, x: -60 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1 }}
+      >
+        {/* Badge */}
+        <motion.div
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-coral/30"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, type: "spring" }}
+            >
+              <Sparkles className="w-4 h-4 text-coral" />
+              <span className="text-sm font-semibold text-coral">Cultural Visionary & Founder</span>
+            </motion.div>
+
+            {/* Main headline */}
+            <h1 className="text-6xl lg:text-7xl font-bold leading-tight">
+              <span className="block gradient-text mb-3">The Woman Who</span>
+              <span className="block gradient-text mb-3">Brought 70+ Countries</span>
+              <span className="block gradient-text">Together Through Art</span>
+        </h1>
+
+            {/* Subtitle */}
+            <p className="text-2xl text-secondary leading-relaxed max-w-xl">
+              From Law & Finance to Cultural Diplomacy: <span className="text-coral font-semibold">15 years</span> of uniting <span className="text-sky font-semibold">100+ nationalities</span> through the healing power of art.
+            </p>
+
+            {/* Quote */}
+            <motion.blockquote
+              className="border-l-4 border-coral pl-6 py-4 italic text-lg text-secondary"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              "Art itself is a healing force. Art is an ultimate form of meditation."
+            </motion.blockquote>
+
+            {/* Quick stats */}
+            <div className="grid grid-cols-3 gap-6 pt-6">
+              {[
+                { value: "400+", label: "Artists" },
+                { value: "70+", label: "Countries" },
+                { value: "15+", label: "Years" },
+              ].map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  className="text-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 + i * 0.1 }}
+                >
+                  <div className="text-4xl font-bold gradient-text">{stat.value}</div>
+                  <div className="text-sm text-tertiary mt-1">{stat.label}</div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* CTA Buttons */}
+            <motion.div
+              className="flex items-center gap-4 pt-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.9 }}
+            >
+              <Link to="/projects" className="btn btn-primary group">
+                <span>Explore QIAF 2025</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link to="/about" className="btn btn-ghost">
+                The Journey
+              </Link>
+            </motion.div>
+          </motion.div>
+
+          {/* RIGHT: Featured QIAF Image */}
+          <motion.div
+            className="relative"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.2, delay: 0.4 }}
           >
-            Cultural Diplomat • Founder & President, MAPS International WLL • CEO, Qatar International Art Festival (QIAF)
-          </motion.p>
-
-          <div className="mt-5 flex flex-wrap gap-2">
-            {["Cultural Diplomacy", "Global Festivals", "Youth & Education", "Innovation in Arts"].map((t, i) => (
-              <motion.span
-                key={t}
-                className="rounded-full bg-white/90 px-3 py-1 text-xs shadow"
-                initial={{ y: 10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ ...spring, delay: 0.05 * i + 0.15 }}
-                whileHover={{ scale: 1.08 }}
-                style={{
-                  boxShadow: nameHover ? `0 0 0 2px ${soft.accent}20, 0 10px 30px ${soft.accent2}17` : undefined,
-                }}
-              >
-                {t}
-              </motion.span>
-            ))}
-          </div>
-
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link to="/projects" className="rounded-full px-5 py-2 text-white shadow" style={{ background: soft.accent }}>
-              Explore Projects & Programs
-            </Link>
-            <Link to="/impact" className="rounded-full px-5 py-2 shadow" style={{ background: "white" }}>
-              Impact & Recognition
-            </Link>
-            <Link to="/about" className="rounded-full px-5 py-2 shadow" style={{ background: soft.cream }}>
-              About Rashmi
-            </Link>
-          </div>
-
-          {/* flourish */}
-          <motion.svg viewBox="0 0 500 120" className="mt-8 h-24 w-full" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true, amount: 0.6 }}>
-            <motion.path
-              d="M10,60 C120,-20 200,120 300,40 C380,-20 440,110 490,20"
-              fill="none"
-              stroke={soft.accent}
-              strokeWidth={5}
-              strokeLinecap="round"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 2.2, ease: "easeInOut" }}
-            />
-          </motion.svg>
-
-          {/* rotating badge */}
-          <div className="hidden md:block mt-6">
-            <RotatingTextBadge text="• cultural diplomat • founder • curator • leader • " />
-          </div>
-        </div>
-
-        {/* RIGHT: portrait + glow */}
-        <div className="relative grid place-items-center">
-          <motion.div initial={{ scale: 0.94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={spring} className="relative">
-            <img
-              src="https://i.postimg.cc/g0FkD52H/image.png"
-              alt="Rashmi Agarwal"
-              className="h-64 w-64 rounded-[28px] object-cover shadow-2xl ring-4"
-              style={{ ringColor: soft.accent }}
-            />
-            <div
-              className="pointer-events-none absolute -inset-3 -z-10 rounded-[36px] blur-2xl"
-              style={{
-                background: `radial-gradient(600px circle at 30% 20%, ${soft.accent}33, transparent), radial-gradient(600px circle at 80% 70%, ${soft.accent2}33, transparent)`,
-              }}
-            />
+            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl">
+              <img
+                src="https://i.postimg.cc/fbdJVkXn/image.png"
+                alt="QIAF 2025 - Qatar International Art Festival"
+                className="w-full h-full object-cover"
+              />
+              
+              {/* Overlay gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+              
+              {/* Featured badge */}
+              <div className="absolute bottom-8 left-8 right-8">
+                <motion.div
+                  className="glass-frosted rounded-2xl p-6"
+                  initial={{ y: 40, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 1 }}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-2xl font-bold text-white mb-2">QIAF 2025</h3>
+                      <p className="text-white/80 text-sm mb-4">
+                        Qatar's Premier International Art Festival
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-white/60">
+                        <span>Dec 7-12</span>
+                        <span>•</span>
+                        <span>400+ Artists</span>
+                        <span>•</span>
+                        <span>70 Countries</span>
+                      </div>
+                    </div>
+                    <Sparkles className="w-8 h-8 text-amber flex-shrink-0" />
+                  </div>
+                </motion.div>
+              </div>
+            </div>
           </motion.div>
         </div>
-      </div>
-    </section>
-  );
-};
 
-const PartnersMarquee: React.FC = () => {
-  const logos = [
-    "https://i.postimg.cc/pVYkLBrs/image.png",
-    "https://i.postimg.cc/RhK0vF4Y/image.png",
-    "https://i.postimg.cc/3x3Qz8ZP/image.png",
-    "https://i.postimg.cc/YqFFSrdc/image.png",
-    "https://i.postimg.cc/sD5mvdcP/image.png",
-  ];
-  return (
-    <section aria-label="Partners" className="mx-auto max-w-7xl px-4">
-      <div className="rounded-3xl bg-white/70 p-4 shadow">
-        <div className="relative overflow-hidden">
-          <div className="flex gap-10 animate-[marquee_28s_linear_infinite] will-change-transform">
-            {[...logos, ...logos].map((src, i) => (
-              <img key={i} src={src} alt="partner" className="h-14 w-auto object-contain opacity-80" />
+        {/* Trust Bar - Partner Logos */}
+        <motion.div
+          className="mt-20 pt-12 border-t border-slate/10"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.2 }}
+        >
+          <p className="text-center text-sm text-tertiary mb-8">
+            Board Member • Cultural Ambassador • Humanitarian Leader
+          </p>
+          <div className="flex items-center justify-center gap-12 flex-wrap opacity-60 hover:opacity-100 transition-opacity">
+            {[
+              "Qatar Government",
+              "Katara Cultural Village",
+              "UNESCO",
+              "British Council",
+              "Silk Painters International (USA)",
+              "Human Rights Int'l Federation",
+            ].map((partner, i) => (
+        <motion.div
+                key={partner}
+                className="text-sm font-semibold text-slate"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.3 + i * 0.1 }}
+              >
+                {partner}
+              </motion.div>
             ))}
           </div>
-        </div>
-      </div>
-      <style>{`@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
-    </section>
-  );
-};
-
-/** MERGED Overview */
-const OverviewSplit: React.FC = () => {
-  return (
-    <section id="overview" className="relative mx-auto max-w-6xl overflow-hidden px-4 py-10 sm:py-12">
-      {/* softer gradient background */}
-      <div
-        className="absolute inset-0 -z-10"
-        style={{
-          background:
-            `radial-gradient(100% 100% at 50% 50%, ${soft.blush} 0%, ${soft.petal} 40%, ${soft.mist} 75%, transparent 100%)`,
-          backgroundColor: soft.cream,
-        }}
-      />
-
-      <div className="grid items-center gap-6 md:gap-8 lg:grid-cols-2">
-        {/* LEFT: frosted-glass text panel */}
-        <article className="relative rounded-3xl border border-white/30 bg-white/20 shadow-2xl backdrop-blur-xl backdrop-saturate-150 p-6 sm:p-8">
-          {/* animated gradient border glow */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 rounded-3xl"
-            style={{
-              background: `conic-gradient(from 0deg at 50% 50%, ${soft.accent}, ${soft.accent2}, ${soft.accent})`,
-              filter: "blur(18px)",
-              opacity: 0.16,
-            }}
-          />
-
-          {/* chip/badge */}
-          <motion.p
-            initial={{ x: -12, opacity: 0 }}
-            whileInView={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-black/70 backdrop-blur-md"
-          >
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: soft.accent }} />
-            Overview
-          </motion.p>
-
-          {/* headline with animated ink/gradient sweep */}
-          <motion.h2
-            initial={{ y: 18, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            className="mt-2 text-3xl sm:text-4xl font-extrabold bg-[length:200%_100%] bg-clip-text text-transparent"
-            style={{
-              backgroundImage: `linear-gradient(90deg, ${soft.accent} 0%, ${soft.accent2} 50%, ${soft.accent} 100%)`,
-              WebkitTextStroke: "1px rgba(0,0,0,0.05)",
-              animation: "inkShift 7s linear infinite",
-            }}
-          >
-            Rashmi Agarwal
-          </motion.h2>
-
-          {/* sub-sections from both codes */}
-          <div className="mt-5 space-y-4 text-[15px] leading-7 text-black/80 max-w-[60ch]">
-            {/* Code 1 */}
-            <motion.div
-              initial={{ y: 10, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.05 }}
-              className="rounded-2xl border border-white/30 bg-white/40 p-4 backdrop-blur-md"
-            >
-              <h3 className="text-base font-semibold" style={{ color: soft.accent2 }}>Cultural Entrepreneur</h3>
-              <p className="mt-1">
-                Rashmi Agarwal works at the crossroads of art, business, and social impact—treating culture as infrastructure
-                for connection, learning, and place-making.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ y: 10, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.12 }}
-              className="rounded-2xl border border-white/30 bg-white/40 p-4 backdrop-blur-md"
-            >
-              <h3 className="text-base font-semibold" style={{ color: soft.accent }}>Founder of MAPS</h3>
-              <p className="mt-1">
-                As Chairperson of MAPS International W.L.L., she builds programs spanning exhibitions, residencies, and international
-                collaborations—aligning museums, councils, and brands to measurable goals.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ y: 10, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.18 }}
-              className="rounded-2xl border border-white/30 bg-white/40 p-4 backdrop-blur-md"
-            >
-              <h3 className="text-base font-semibold" style={{ color: soft.accent2 }}>Bridge Builder</h3>
-              <p className="mt-1">
-                She mentors emerging talent and women leaders, creates youth pipelines, and strengthens institutional capacity—shaping
-                sustainable platforms for cultural growth.
-              </p>
-            </motion.div>
-
-            {/* Code 2 */}
-            <div className="rounded-2xl border border-white/30 bg-white/40 p-4 backdrop-blur-md">
-              <h3 className="text-base font-semibold" style={{ color: soft.accent2 }}>
-                A Visionary at the Crossroads of Art, Business & Social Impact
-              </h3>
-              <p className="mt-1">
-                Pioneering entrepreneur and strategic leader with 20+ years advancing cultural engagement and social impact. Through
-                MAPS International WLL and the Qatar International Art Festival (QIAF), she elevates the region’s art landscape,
-                empowering emerging voices and global dialogue.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/30 bg-white/40 p-4 backdrop-blur-md">
-              <h3 className="text-base font-semibold" style={{ color: soft.accent }}>
-                Founder & President, MAPS International WLL • CEO, QIAF
-              </h3>
-              <p className="mt-1">
-                Blending curation, strategy, finance, and management to bridge art and business. Collaborates with governments,
-                institutions, and global organizations to amplify art’s impact.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/30 bg-white/40 p-4 backdrop-blur-md">
-              <h3 className="text-base font-semibold" style={{ color: soft.accent2 }}>
-                Global Impact
-              </h3>
-              <p className="mt-1">
-                400+ artists from 70+ countries, 150+ transformative events, and 5,000+ youth empowered under her leadership. Featured
-                by <em>HuffMag</em> and recognized among the “Top Arab Cultural Leaders 2025” by The Arab Leaders.
-              </p>
-            </div>
-          </div>
-
-          {/* light sweep across panel */}
-          <span className="shine pointer-events-none" aria-hidden />
-        </article>
-
-        {/* RIGHT: portrait with glow */}
-        <figure className="relative mx-auto w-full max-w-sm">
-          <img
-            src="https://i.postimg.cc/mkZ5XGXh/image.png"
-            alt="Portrait of Rashmi Agarwal"
-            className="aspect-[3/4] w-full rounded-3xl object-cover shadow-xl ring-1 ring-white/40"
-            loading="lazy"
-          />
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -inset-4 -z-10 rounded-[28px] blur-2xl"
-            style={{
-              background:
-                `radial-gradient(60% 60% at 30% 30%, ${soft.accent}59, transparent), radial-gradient(60% 60% at 70% 70%, ${soft.accent2}47, transparent)`,
-            }}
-          />
-        </figure>
-      </div>
-
-      {/* animations */}
-      <style>{`
-        @keyframes inkShift { 0% { background-position: 0% 50% } 100% { background-position: 200% 50% } }
-        @keyframes sweep {
-          0% { transform: translateX(-140%) rotate(10deg); }
-          55%,100% { transform: translateX(140%) rotate(10deg); }
-        }
-        .shine {
-          position: absolute; inset: -10%; border-radius: 1.5rem;
-          background: linear-gradient(100deg, rgba(255, 255, 255, 0) 25%, rgba(255, 255, 255, 0.55) 50%, rgba(255, 255, 255, 0) 75%);
-          transform: translateX(-140%) rotate(10deg);
-          animation: sweep 7s ease-in-out infinite; opacity: .55; filter: blur(2px);
-        }
-        @media (prefers-reduced-motion: reduce) { .shine { animation: none; opacity: .25; } }
-      `}</style>
-    </section>
-  );
-};
-
-const QIAFTeaser: React.FC = () => (
-  <section className="mx-auto max-w-6xl px-4">
-    <div className="grid items-stretch gap-6 md:grid-cols-[1.3fr_1fr]">
-      <motion.div className="relative overflow-hidden rounded-3xl bg-white p-6 shadow" initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={spring} viewport={{ once: true }}>
-        <h3 className="text-2xl font-semibold" style={{ color: soft.ink }}>QIAF 2025 — Sustainability & Innovation in Art</h3>
-        <p className="mt-2 text-black/70">December 7–12, 2025 · Katara Cultural Village, Building 12, Doha · 400+ artists from 70+ countries</p>
-        <ul className="mt-4 grid gap-2 list-disc pl-4 text-black/80">
-          <li>Red Carpet Opening • International Exhibitions • Masterclasses • Live Painting • Panels</li>
-          <li>Sustainable Fashion Shows • Musical Evenings • Heritage Tours • Auctions • Awards</li>
-        </ul>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link to="/projects#qiaf-2025" className="rounded-full px-4 py-2 text-white" style={{ background: soft.accent }}>Learn more</Link>
-          <a href="https://qiaf.net/" target="_blank" rel="noreferrer" className="rounded-full px-4 py-2" style={{ background: soft.cream }}>Official site</a>
-        </div>
-        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full blur-3xl" style={{ background: soft.petal, opacity: 0.6 }} />
-      </motion.div>
-
-      <motion.div className="relative overflow-hidden rounded-3xl shadow-2xl" initial={{ scale: 0.98, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} transition={spring} viewport={{ once: true }}>
-        <img
-          src="https://qiaf.net/wp-content/uploads/2021/11/249411972_10165732106720113_24742049591562404_n-700x441.jpg.webp"
-          alt="QIAF Red Carpet"
-          className="h-full w-full object-cover"
-        />
-      </motion.div>
-    </div>
-  </section>
-);
-
-const ImpactCounters: React.FC = () => (
-  <section className="mx-auto max-w-6xl px-4">
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {[
-        { label: "Countries", value: 70, suffix: "+" },
-        { label: "Artists (2025 target)", value: 400, suffix: "+" },
-        { label: "Years of Excellence", value: 11, suffix: "+" },
-        { label: "Media Mentions", value: 850, suffix: "+" },
-      ].map((item, i) => (
-        <motion.div key={item.label} className="rounded-3xl bg-white/80 p-6 text-center shadow" initial={{ y: 16, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={{ ...spring, delay: 0.05 * i }} viewport={{ once: true }}>
-          <div className="text-4xl font-semibold" style={{ color: i % 2 ? soft.accent2 : soft.accent }}>
-            <AnimatedNumber value={item.value} suffix={item.suffix} />
-          </div>
-          <div className="mt-1 text-sm text-black/60">{item.label}</div>
         </motion.div>
-      ))}
-    </div>
-  </section>
-);
+      </div>
+    </section>
+  );
+};
 
-const QuoteStrip: React.FC = () => (
-  <section className="mx-auto max-w-5xl px-4">
-    <div className="rounded-3xl bg-white/80 p-8 shadow">
-      <motion.blockquote initial={{ y: 16, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={spring} viewport={{ once: true }}>
-        <p className="text-xl italic" style={{ color: soft.ink }}>
-          “All kinds of art have a radiant tool to heal body, soul, mind and emotions… I believe art has a natural healing component of its own.”
-        </p>
-        <footer className="mt-3 text-sm text-black/60">— Rashmi Agarwal</footer>
-      </motion.blockquote>
-    </div>
-  </section>
-);
+/* ==========================================
+   ACT 2: IMPACT & PROJECTS
+   Stats cascade + Rich project grid
+   ========================================== */
+const Act2Impact: React.FC = () => {
+  const projects = [
+    {
+      id: 1,
+      title: "QIAF 2025 - 7th Edition",
+      category: "International Art Festival",
+      description: "Qatar's premier international art festival bringing together 400+ artists from 70+ countries. First sustainability-focused edition with largest international participation ever.",
+      stats: {
+        artists: "400+",
+        countries: "70+",
+        days: "6",
+        investment: "$2-3M",
+      },
+      highlights: [
+        "Sustainable fashion shows",
+        "Environmental art installations",
+        "Green technology integration",
+        "15 major components",
+      ],
+      image: "https://i.postimg.cc/fbdJVkXn/image.png",
+      color: tokens.colors.coral.base,
+      size: "large", // 2x2
+    },
+    {
+      id: 2,
+      title: "The YOUTH Platform",
+      category: "Youth Development",
+      description: "Empowering Qatar's next generation through innovation and creativity across 8 focus areas with 500+ participants from 50+ institutions.",
+      stats: {
+        participants: "500+",
+        institutions: "50+",
+        focusAreas: "8",
+      },
+      highlights: [
+        "AI & Robotics workshops",
+        "Arts & Creative expression",
+        "STEM & Research programs",
+        "Music & Performance training",
+      ],
+      image: "https://i.postimg.cc/CKFVPVbS/image.png",
+      color: tokens.colors.sky.base,
+      size: "medium", // 1x2
+    },
+    {
+      id: 3,
+      title: "Cultural Bridge-Building",
+      category: "International Diplomacy",
+      description: "11+ years of international partnerships connecting cultures through art and education across embassies, governments, and cultural institutions.",
+      stats: {
+        countries: "70+",
+        ambassadors: "32+",
+        years: "11+",
+      },
+      highlights: [
+        "Embassy partnerships",
+        "Government collaborations",
+        "Cultural exchange programs",
+        "International media coverage",
+      ],
+      image: "https://i.postimg.cc/d3qwvxTh/image.png",
+      color: tokens.colors.amber.base,
+      size: "medium", // 1x2
+    },
+    {
+      id: 4,
+      title: "Katara Space Science Program",
+      category: "STEM Education",
+      description: "Revolutionary 4th annual space science education program connecting youth with NASA/ISRO, featuring cutting-edge space technology and research.",
+      stats: {
+        duration: "3 days",
+        sessions: "6hrs/day",
+      },
+      highlights: [
+        "NASA partnership",
+        "ISRO collaboration",
+        "Hands-on space tech",
+        "Youth researchers",
+      ],
+      image: "https://i.postimg.cc/mkZ5XGXh/image.png",
+      color: "#9B59B6",
+      size: "small", // 1x1
+    },
+    {
+      id: 5,
+      title: "Global Media Recognition",
+      category: "Press & Coverage",
+      description: "850+ media features across Qatar's leading publications and international outlets, establishing Qatar as a cultural diplomacy leader.",
+      stats: {
+        features: "850+",
+        outlets: "8+",
+      },
+      highlights: [
+        "The Peninsula",
+        "Gulf Times",
+        "Qatar Living",
+        "International press",
+      ],
+      image: "https://i.postimg.cc/YCZk2V3C/image.png",
+      color: "#16A085",
+      size: "small", // 1x1
+    },
+  ];
 
-const FinalCTA: React.FC = () => (
-  <section className="mx-auto max-w-6xl px-4">
-    <div className="grid items-center gap-6 rounded-3xl bg-white/80 p-8 shadow md:grid-cols-[1.2fr_1fr]">
-      <div>
-        <h3 className="text-2xl font-semibold" style={{ color: soft.ink }}>Ready to collaborate?</h3>
-        <p className="mt-2 text-black/70">Partner with MAPS International, join QIAF, or explore youth & innovation programs.</p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Link to="/contact?type=partnership" className="rounded-full px-4 py-2 text-white" style={{ background: soft.accent }}>
-            Partnerships
-          </Link>
-          <Link to="/contact?type=qiaf" className="rounded-full px-4 py-2 text-white" style={{ background: soft.accent2 }}>
-            Join QIAF
-          </Link>
-          <Link to="/about" className="rounded-full px-4 py-2" style={{ background: soft.cream }}>
-            About Rashmi
-          </Link>
+  return (
+    <section className="relative py-32 bg-gradient-to-b from-canvas via-mist to-canvas">
+      {/* Impact Stats Header */}
+      <div className="max-w-7xl mx-auto px-8 mb-20">
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <motion.div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-sky/30 mb-6"
+            initial={{ scale: 0 }}
+            whileInView={{ scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ type: "spring" }}
+          >
+            <TrendingUp className="w-4 h-4 text-sky" />
+            <span className="text-sm font-semibold text-sky">Measurable Impact</span>
+          </motion.div>
+
+          <h2 className="text-6xl font-bold gradient-text mb-6">
+            15 Years of Building Bridges
+          </h2>
+          <p className="text-2xl text-secondary max-w-3xl mx-auto">
+            From local workshops to Qatar's most celebrated international cultural platform
+          </p>
+        </motion.div>
+
+        {/* Big Impact Numbers */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {[
+            { 
+              icon: Globe, 
+              value: 70, 
+              suffix: "+", 
+              label: "Countries Connected",
+              color: tokens.colors.coral.base,
+              desc: "Building bridges across continents"
+            },
+            { 
+              icon: Users, 
+              value: 400, 
+              suffix: "+", 
+              label: "Artists Empowered",
+              color: tokens.colors.sky.base,
+              desc: "Providing platforms for creativity"
+            },
+            { 
+              icon: Rocket, 
+              value: 10000, 
+              suffix: "+", 
+              label: "Youth Reached",
+              color: tokens.colors.amber.base,
+              desc: "Investing in the next generation"
+            },
+            { 
+              icon: Award, 
+              value: 850, 
+              suffix: "+", 
+              label: "Media Features",
+              color: "#9B59B6",
+              desc: "International recognition"
+            },
+          ].map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              className="bento-card p-8 text-center group"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              whileHover={{ y: -8, scale: 1.02 }}
+            >
+              <div
+                className="w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12"
+                style={{ backgroundColor: `${stat.color}20` }}
+              >
+                <stat.icon className="w-8 h-8" style={{ color: stat.color }} />
+                    </div>
+
+              <div className="text-5xl font-bold mb-2" style={{ color: stat.color }}>
+                <AnimatedNumber value={stat.value} suffix={stat.suffix} duration={2.5} />
+                  </div>
+
+              <h3 className="text-lg font-bold text-primary mb-2">{stat.label}</h3>
+              <p className="text-sm text-tertiary">{stat.desc}</p>
+            </motion.div>
+          ))}
         </div>
-      </div>
-      <div className="relative h-36 overflow-hidden rounded-2xl">
-        <motion.div className="absolute inset-0" initial={{ x: 0 }} animate={{ x: "-50%" }} transition={{ repeat: Infinity, duration: 24, ease: "linear" }}
-          style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(0,0,0,0.06) 0 2px, transparent 2px 24px)" }} />
-      </div>
     </div>
+
+      {/* Featured Projects Grid */}
+      <div className="max-w-7xl mx-auto px-8">
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="text-5xl font-bold gradient-text mb-4">
+            Featured Work
+          </h2>
+          <p className="text-xl text-secondary">
+            Transforming Qatar's cultural landscape through strategic initiatives
+          </p>
+            </motion.div>
+
+        {/* Bento Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[280px]">
+          {projects.map((project, i) => (
+            <motion.div
+              key={project.id}
+              className={`bento-card group cursor-pointer overflow-hidden relative ${
+                project.size === "large"
+                  ? "lg:col-span-2 lg:row-span-2"
+                  : project.size === "medium"
+                  ? "lg:col-span-1 lg:row-span-2"
+                  : "lg:col-span-1 lg:row-span-1"
+              }`}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              whileHover={{ scale: 1.02, y: -4 }}
+            >
+              {/* Background Image */}
+              <div className="absolute inset-0">
+                <img
+                  src={project.image}
+                  alt={project.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+              </div>
+
+              {/* Content */}
+              <div className="absolute inset-0 p-6 flex flex-col justify-end">
+                <div className="mb-3">
+                  <span 
+                    className="text-xs font-bold uppercase tracking-wider mb-2 block"
+                    style={{ color: project.color }}
+                  >
+                    {project.category}
+                  </span>
+                  <h3 className="text-white font-bold text-xl mb-2 leading-tight">
+                    {project.title}
+                  </h3>
+                  <p className="text-white/80 text-sm leading-relaxed line-clamp-2 mb-3">
+                    {project.description}
+                  </p>
+                </div>
+
+                {/* Stats */}
+                <div className="flex items-center gap-3 flex-wrap text-xs text-white/60 mb-3">
+                  {Object.entries(project.stats).slice(0, 3).map(([key, value]) => (
+                    <span key={key} className="font-semibold">
+                      {value} {key}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Hover: Show highlights */}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <div className="flex items-center gap-2 flex-wrap mb-3">
+                    {project.highlights.slice(0, 2).map((highlight) => (
+                      <span
+                        key={highlight}
+                        className="text-xs px-2 py-1 rounded-full bg-white/10 text-white/90 backdrop-blur-sm"
+                      >
+                        {highlight}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2 text-white font-semibold text-sm">
+                    <span>Learn More</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* View All Projects CTA */}
+        <motion.div
+          className="text-center mt-16"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+        >
+          <Link to="/projects" className="btn btn-primary text-lg group">
+            <span>View All Projects</span>
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
+/* ==========================================
+   ACT 3: THE INVITATION
+   Strong CTA to start conversations
+   ========================================== */
+const Act3Invitation: React.FC = () => {
+  return (
+    <section className="relative py-32 overflow-hidden">
+      {/* Animated background */}
+      <div className="absolute inset-0 bg-slate-900">
+        {[...Array(3)].map((_, i) => (
+          <motion.div
+                key={i} 
+            className="absolute w-96 h-96 rounded-full blur-3xl"
+            style={{
+              background: `radial-gradient(circle, ${
+                i === 0 ? tokens.colors.coral.base : i === 1 ? tokens.colors.sky.base : tokens.colors.amber.base
+              }, transparent)`,
+              left: `${i * 35}%`,
+              top: `${20 + i * 15}%`,
+              opacity: 0.2,
+            }}
+            animate={{
+              x: [0, 50, 0],
+              y: [0, -30, 0],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 8 + i * 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+              />
+            ))}
+            </div>
+
+      <div className="relative z-10 max-w-4xl mx-auto px-8 text-center text-white">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          {/* Badge */}
+          <motion.div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-frosted border border-white/20 mb-8"
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 3, repeat: Infinity }}
+          >
+            <Heart className="w-4 h-4 text-coral" />
+            <span className="text-sm font-medium text-white">Ready to Collaborate?</span>
+          </motion.div>
+
+          {/* Headline */}
+          <h2 className="text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            Let's Create Something
+            <br />
+            <span className="gradient-text">Extraordinary Together</span>
+          </h2>
+
+          {/* Description */}
+          <p className="text-xl text-white/70 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Whether it's a cultural initiative, youth program, or international collaboration—
+            every great project starts with a conversation.
+          </p>
+
+          {/* CTA Buttons */}
+          <div className="flex items-center justify-center gap-4 flex-wrap mb-12">
+            <Link to="/contact">
+          <motion.button
+                className="btn btn-primary text-lg px-12 py-6 shadow-2xl relative overflow-hidden group"
+                whileHover={{ scale: 1.05, y: -4 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span className="relative z-10 flex items-center gap-3">
+                  Start the Conversation
+                  <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                </span>
+
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-coral via-amber to-sky opacity-0 group-hover:opacity-50 blur-xl"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+          </motion.button>
+            </Link>
+
+            <Link to="/awards" className="btn btn-ghost-white text-lg px-12 py-6">
+              View Recognition
+            </Link>
+          </div>
+
+          {/* Availability Status */}
+          <motion.div
+            className="flex items-center justify-center gap-8 text-sm text-white/60"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span>Available for partnerships</span>
+            </div>
+            <div>•</div>
+            <div>Response within 24 hours</div>
+          </motion.div>
+        </motion.div>
+      </div>
   </section>
 );
+};
 
-/* ----------------------------- page ----------------------------- */
+/* ==========================================
+   MAIN HOMEPAGE COMPONENT
+   ========================================== */
 export default function Index() {
   return (
-    <div id="home" className="min-h-screen bg-background font-[ui-sans-serif]">
-      <Preloader />
-      <GradientBackground />
+    <main className="relative bg-canvas">
+      <Act1Hero />
+      <Act2Impact />
+      <Act3Invitation />
 
-      <main className="mx-auto max-w-7xl space-y-16 py-20">
-        <AnimatedHero />
-        <PartnersMarquee />
-        <OverviewSplit />
+      {/* Footer Links */}
+      <section className="relative py-16 bg-gradient-to-b from-canvas to-mist border-t border-slate/10">
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="flex items-center justify-center gap-6 flex-wrap">
+            <Link to="/about" className="btn btn-ghost">
+              The Journey
+            </Link>
+            <Link to="/projects" className="btn btn-ghost">
+              All Projects
+            </Link>
+            <Link to="/awards" className="btn btn-ghost">
+              Recognition
+            </Link>
+            <Link to="/contact" className="btn btn-ghost">
+              Get in Touch
+            </Link>
+          </div>
 
-        {/* Visual break — include BOTH images */}
-        <OvalBreak src="https://i.postimg.cc/d3qwvxTh/image.png" alt="HuffMag feature" />
-        <QIAFTeaser />
-        <ImpactCounters />
-        <OvalBreak src="https://i.postimg.cc/CKFVPVbS/image.png" alt="QIAF 2025 Ambassadors" />
-        <QuoteStrip />
-        <FinalCTA />
-
-        <footer className="mx-auto max-w-6xl px-4 py-10 text-sm text-black/60">
-          © {new Date().getFullYear()} Rashmi Agarwal — All rights reserved.
-        </footer>
-      </main>
+          <p className="text-sm text-tertiary text-center mt-12">
+            © {new Date().getFullYear()} Rashmi Agarwal • MAPS International WLL • All rights reserved
+          </p>
     </div>
+      </section>
+    </main>
   );
 }

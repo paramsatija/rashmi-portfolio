@@ -1,92 +1,148 @@
 /**
- * Footer Component
- * Consistent footer across all pages with social links and copyright
+ * Footer Component - Sky & Warmth Edition
+ * Minimal, clean footer with social links
  */
 
 import { Link } from "react-router-dom";
-import { Instagram, Mail } from "lucide-react";
+import { Instagram, Linkedin, Mail, ExternalLink } from "lucide-react";
 
-interface FooterProps {
-  customText?: string;
-}
+const palette = {
+  coral: "#FF6B4A",
+  sky: "#4A9EFF",
+  slate: "#2D3748",
+  textSoft: "#4A5568",
+};
 
-export default function Footer({ customText }: FooterProps) {
+const footerLinks = {
+  navigation: [
+    { label: "About", href: "/about" },
+    { label: "Projects & Programs", href: "/projects" },
+    { label: "Impact & Recognition", href: "/awards" },
+    { label: "Contact", href: "/contact" },
+  ],
+  organizations: [
+    { label: "MAPS International WLL", href: "#" },
+    { label: "Qatar International Art Festival", href: "https://qiaf.net/", external: true },
+    { label: "Al Thuraya Planetarium", href: "#" },
+  ],
+  social: [
+    { label: "Instagram", href: "https://instagram.com/rashmiagarwal", icon: Instagram },
+    { label: "LinkedIn", href: "#", icon: Linkedin },
+    { label: "Email", href: "mailto:contact@qiaf.org", icon: Mail },
+  ],
+};
+
+export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-primary-900 text-ice-200 py-12 mt-20">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="grid md:grid-cols-3 gap-8 mb-8">
-          {/* Brand */}
-          <div>
-            <h3 className="font-accent text-2xl gradient-text-warm mb-2">
+    <footer className="relative mt-20 border-t border-gray-200/50 bg-white/40 backdrop-blur-strong">
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="grid md:grid-cols-4 gap-8 mb-8">
+          {/* Brand Column */}
+          <div className="md:col-span-1">
+            <h3 className="font-bold text-xl gradient-text mb-4">
               Rashmi Agarwal
             </h3>
-            <p className="text-sm text-ice-200/80">
-              Cultural Strategist & Designer
+            <p className="text-sm leading-relaxed" style={{ color: palette.textSoft }}>
+              Cultural Diplomat, Entrepreneur, and Founder bridging art, business, and social impact.
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* Navigation */}
           <div>
-            <h4 className="font-title font-semibold mb-3">Quick Links</h4>
-            <div className="flex flex-col gap-2">
-              <Link
-                to="/projects"
-                className="text-sm hover:text-sky-300 transition-colors"
-              >
-                Projects & Programs
-              </Link>
-              <Link
-                to="/about"
-                className="text-sm hover:text-sky-300 transition-colors"
-              >
-                About
-              </Link>
-              <Link
-                to="/awards"
-                className="text-sm hover:text-sky-300 transition-colors"
-              >
-                Awards & Recognition
-              </Link>
-              <Link
-                to="/contact"
-                className="text-sm hover:text-sky-300 transition-colors"
-              >
-                Contact
-              </Link>
-            </div>
+            <h4 className="font-semibold mb-4" style={{ color: palette.slate }}>
+              Navigation
+            </h4>
+            <ul className="space-y-2">
+              {footerLinks.navigation.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    to={link.href}
+                    className="text-sm hover:gradient-text transition-all"
+                    style={{ color: palette.textSoft }}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* Connect */}
+          {/* Organizations */}
           <div>
-            <h4 className="font-title font-semibold mb-3">Connect</h4>
-            <div className="flex gap-4">
-              <a
-                href="https://instagram.com/rashmiagarwal"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram size={20} />
-              </a>
-              <a
-                href="mailto:rashmi@example.com"
-                className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
-                aria-label="Email"
-              >
-                <Mail size={20} />
-              </a>
+            <h4 className="font-semibold mb-4" style={{ color: palette.slate }}>
+              Organizations
+            </h4>
+            <ul className="space-y-2">
+              {footerLinks.organizations.map((link) => (
+                <li key={link.label}>
+                  {link.external ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm hover:gradient-text transition-all inline-flex items-center gap-1"
+                      style={{ color: palette.textSoft }}
+                    >
+                      {link.label}
+                      <ExternalLink size={12} />
+                    </a>
+                  ) : (
+                    <a
+                      href={link.href}
+                      className="text-sm hover:gradient-text transition-all"
+                      style={{ color: palette.textSoft }}
+                    >
+                      {link.label}
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Social & Contact */}
+          <div>
+            <h4 className="font-semibold mb-4" style={{ color: palette.slate }}>
+              Connect
+            </h4>
+            <div className="flex gap-3 mb-4">
+              {footerLinks.social.map((social) => {
+                const Icon = social.icon;
+                return (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="glass-frosted p-3 rounded-xl hover:scale-110 transition-transform"
+                    aria-label={social.label}
+                  >
+                    <Icon size={20} style={{ color: palette.coral }} />
+                  </a>
+                );
+              })}
             </div>
+            <p className="text-xs" style={{ color: palette.textSoft }}>
+              Doha, Qatar
+            </p>
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-6 text-center text-sm text-ice-200/60">
-          <p>
-            {customText ||
-              `© ${currentYear} Rashmi Agarwal — Cultural Strategist & Designer.`}
+        {/* Bottom Bar */}
+        <div className="pt-8 border-t border-gray-200/50 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm" style={{ color: palette.textSoft }}>
+            © {currentYear} Rashmi Agarwal. All rights reserved.
           </p>
+          <div className="flex gap-6 text-xs" style={{ color: palette.textSoft }}>
+            <Link to="/contact" className="hover:gradient-text transition-all">
+              Privacy Policy
+            </Link>
+            <Link to="/contact" className="hover:gradient-text transition-all">
+              Terms of Service
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

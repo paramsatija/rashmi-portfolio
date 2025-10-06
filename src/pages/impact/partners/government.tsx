@@ -57,7 +57,7 @@ export default function GovernmentPartnersPage() {
             <Link href="/impact#partners" className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm text-white" style={{ background: soft.accent2 }}>
               <ArrowLeft size={16} /> Back to Partnerships
             </Link>
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/85 px-3 py-1.5 text-sm shadow">
+            <div className="inline-flex items-center gap-2 rounded-full glass-white px-3 py-1.5 text-sm shadow">
               <Landmark size={16} /> Government
             </div>
           </div>
@@ -92,10 +92,10 @@ export default function GovernmentPartnersPage() {
             <Link href="/impact/partners/embassy" className="rounded-full px-4 py-2 text-white btn-magnetic" style={{ background: soft.accent }}>
               View Embassies <ArrowRight size={16} />
             </Link>
-            <Link href="/impact/partners/ngo" className="rounded-full px-4 py-2 bg-white shadow hover-lift">
+            <Link href="/impact/partners/ngo" className="rounded-full px-4 py-2 glass-white shadow hover-lift">
               View NGOs
             </Link>
-            <Link href="/impact/partners/cultural" className="rounded-full px-4 py-2 bg-white shadow hover-lift">
+            <Link href="/impact/partners/cultural" className="rounded-full px-4 py-2 glass-white shadow hover-lift">
               View Cultural Partners
             </Link>
           </div>
