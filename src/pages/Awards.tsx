@@ -203,7 +203,20 @@ const AWARDS = [
     <main className="relative bg-canvas">
       {/* BOLD HERO SECTION */}
       <section className="relative min-h-screen flex items-center py-20 overflow-hidden">
-        {/* Animated background */}
+        {/* Background Image Layer - Elegant award ceremony/diplomatic setting */}
+        <div className="absolute inset-0">
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: 'url(https://images.unsplash.com/photo-1511578314322-379afb476865?w=1920&q=80)',
+              opacity: 0.12,
+            }}
+          />
+          {/* Gradient overlay for depth */}
+          <div className="absolute inset-0 bg-gradient-to-br from-canvas via-canvas/95 to-mist/90" />
+        </div>
+
+        {/* Animated gradient orbs */}
         <div className="absolute inset-0">
           {[...Array(3)].map((_, i) => (
             <motion.div
@@ -304,14 +317,17 @@ const AWARDS = [
               </motion.div>
             </motion.div>
 
-            {/* RIGHT: Featured Recognition Image */}
+            {/* RIGHT: Featured Recognition Image - Premium Layered */}
             <motion.div
               className="relative"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1.2, delay: 0.4 }}
             >
-              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl">
+              {/* Decorative background frame */}
+              <div className="absolute inset-0 bg-gradient-to-br from-amber/20 to-coral/20 rounded-3xl blur-2xl scale-105 -z-10" />
+              
+              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/20">
                 <img
                   src="https://i.postimg.cc/YCZk2V3C/image.png"
                   alt="Rashmi Agarwal - Awards and Recognition"

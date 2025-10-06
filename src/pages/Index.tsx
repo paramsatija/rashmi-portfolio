@@ -75,13 +75,26 @@ const AnimatedNumber: React.FC<{
 const Act1Hero: React.FC = () => {
   return (
     <section className="relative min-h-screen flex items-center py-20 overflow-hidden">
-      {/* Animated gradient background */}
+      {/* Background Image Layer - Artistic international cultural scene */}
+      <div className="absolute inset-0">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: 'url(https://images.unsplash.com/photo-1569408995213-a8d4a6d6d2f7?w=1920&q=80)',
+            opacity: 0.15,
+          }}
+        />
+        {/* Gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-br from-canvas via-canvas/95 to-mist/90" />
+      </div>
+
+      {/* Animated gradient orbs */}
       <div className="absolute inset-0">
         {[...Array(3)].map((_, i) => (
-      <motion.div
+        <motion.div
             key={i}
             className="absolute w-96 h-96 rounded-full blur-3xl opacity-20"
-          style={{
+            style={{
               background: `radial-gradient(circle, ${
                 i === 0 ? tokens.colors.coral.base : i === 1 ? tokens.colors.sky.base : tokens.colors.amber.base
               }, transparent)`,
@@ -129,7 +142,7 @@ const Act1Hero: React.FC = () => {
               <span className="block gradient-text">Together Through Art</span>
         </h1>
 
-            {/* Subtitle */}
+        {/* Subtitle */}
             <p className="text-2xl text-secondary leading-relaxed max-w-xl">
               From Law & Finance to Cultural Diplomacy: <span className="text-coral font-semibold">15 years</span> of uniting <span className="text-sky font-semibold">100+ nationalities</span> through the healing power of art.
             </p>
@@ -181,14 +194,17 @@ const Act1Hero: React.FC = () => {
             </motion.div>
           </motion.div>
 
-          {/* RIGHT: Featured QIAF Image */}
+          {/* RIGHT: Featured QIAF Image - Premium Layered */}
           <motion.div
             className="relative"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, delay: 0.4 }}
           >
-            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl">
+            {/* Decorative background frame */}
+            <div className="absolute inset-0 bg-gradient-to-br from-coral/20 to-sky/20 rounded-3xl blur-2xl scale-105 -z-10" />
+            
+            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/20">
               <img
                 src="https://i.postimg.cc/fbdJVkXn/image.png"
                 alt="QIAF 2025 - Qatar International Art Festival"
@@ -313,6 +329,46 @@ const Act2Impact: React.FC = () => {
     },
     {
       id: 3,
+      title: "Katara Space Science Program",
+      category: "STEM Revolution",
+      description: "6 editions in just 6 months! 3,000+ students engaged with NASA, ISRO & space agencies. Unprecedented achievement in space science education with hands-on rocket launches, telescope building & magnetometer production.",
+      stats: {
+        students: "3,000+",
+        editions: "6",
+        months: "6",
+      },
+      highlights: [
+        "6 editions in 6 months",
+        "NASA & ISRO partnership",
+        "18 rockets launched",
+        "300+ telescopes built",
+      ],
+      image: "https://i.postimg.cc/mkZ5XGXh/image.png",
+      color: "#9B59B6",
+      size: "medium", // 1x2
+    },
+    {
+      id: 4,
+      title: "Bharat Vastram (भारत वस्त्रम)",
+      category: "Cultural Fashion",
+      description: "India-Qatar cultural spectacular showcasing ALL 29 Indian states through traditional fashion. 200+ elite dignitaries witnessed this celebration of India's unity in diversity.",
+      stats: {
+        states: "29",
+        dignitaries: "200+",
+        ambassadors: "29",
+      },
+      highlights: [
+        "All 29 Indian states",
+        "Traditional costumes",
+        "VCUarts Qatar venue",
+        "India-Qatar Year 2019",
+      ],
+      image: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=800&q=80",
+      color: "#E74C3C",
+      size: "small", // 1x1
+    },
+    {
+      id: 5,
       title: "Cultural Bridge-Building",
       category: "International Diplomacy",
       description: "11+ years of international partnerships connecting cultures through art and education across embassies, governments, and cultural institutions.",
@@ -329,29 +385,30 @@ const Act2Impact: React.FC = () => {
       ],
       image: "https://i.postimg.cc/d3qwvxTh/image.png",
       color: tokens.colors.amber.base,
-      size: "medium", // 1x2
-    },
-    {
-      id: 4,
-      title: "Katara Space Science Program",
-      category: "STEM Education",
-      description: "Revolutionary 4th annual space science education program connecting youth with NASA/ISRO, featuring cutting-edge space technology and research.",
-      stats: {
-        duration: "3 days",
-        sessions: "6hrs/day",
-      },
-      highlights: [
-        "NASA partnership",
-        "ISRO collaboration",
-        "Hands-on space tech",
-        "Youth researchers",
-      ],
-      image: "https://i.postimg.cc/mkZ5XGXh/image.png",
-      color: "#9B59B6",
       size: "small", // 1x1
     },
     {
-      id: 5,
+      id: 6,
+      title: "Colours of Desert",
+      category: "Heritage & Art",
+      description: "7 editions celebrating traditional Qatari culture meets contemporary art. 150+ artists exploring desert heritage through modern artistic expression.",
+      stats: {
+        editions: "7",
+        artists: "150+",
+        exhibitions: "25",
+      },
+      highlights: [
+        "Desert heritage",
+        "Contemporary art",
+        "Cultural identity",
+        "Local & international artists",
+      ],
+      image: "https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=800&q=80",
+      color: "#F39C12",
+      size: "small", // 1x1
+    },
+    {
+      id: 7,
       title: "Global Media Recognition",
       category: "Press & Coverage",
       description: "850+ media features across Qatar's leading publications and international outlets, establishing Qatar as a cultural diplomacy leader.",
@@ -407,32 +464,32 @@ const Act2Impact: React.FC = () => {
               icon: Globe, 
               value: 70, 
               suffix: "+", 
-              label: "Countries Connected",
+              label: "Countries United",
               color: tokens.colors.coral.base,
-              desc: "Building bridges across continents"
-            },
-            { 
-              icon: Users, 
-              value: 400, 
-              suffix: "+", 
-              label: "Artists Empowered",
-              color: tokens.colors.sky.base,
-              desc: "Providing platforms for creativity"
+              desc: "Through QIAF & cultural programs"
             },
             { 
               icon: Rocket, 
-              value: 10000, 
+              value: 3000, 
               suffix: "+", 
-              label: "Youth Reached",
-              color: tokens.colors.amber.base,
-              desc: "Investing in the next generation"
+              label: "Students in STEM",
+              color: "#9B59B6",
+              desc: "6 KSSP editions in 6 months"
+            },
+            { 
+              icon: Users, 
+              value: 500, 
+              suffix: "+", 
+              label: "Youth Empowered",
+              color: tokens.colors.sky.base,
+              desc: "Through The YOUTH Platform"
             },
             { 
               icon: Award, 
               value: 850, 
               suffix: "+", 
               label: "Media Features",
-              color: "#9B59B6",
+              color: tokens.colors.amber.base,
               desc: "International recognition"
             },
           ].map((stat, i) => (

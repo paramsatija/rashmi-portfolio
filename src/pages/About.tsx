@@ -322,7 +322,20 @@ export default function About() {
     <main className="relative bg-canvas overflow-hidden">
       {/* BOLD HERO SECTION */}
       <section className="relative min-h-screen flex items-center py-20 overflow-hidden">
-        {/* Animated background */}
+        {/* Background Image Layer - Bridge/pathway representing journey */}
+        <div className="absolute inset-0">
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: 'url(https://images.unsplash.com/photo-1519046904884-53103b34b206?w=1920&q=80)',
+              opacity: 0.12,
+            }}
+          />
+          {/* Gradient overlay for depth */}
+          <div className="absolute inset-0 bg-gradient-to-br from-canvas via-canvas/95 to-mist/90" />
+        </div>
+
+        {/* Animated gradient orbs */}
         <div className="absolute inset-0">
           {[...Array(3)].map((_, i) => (
             <motion.div
@@ -367,7 +380,7 @@ export default function About() {
               >
                 <Heart className="w-4 h-4 text-coral" />
                 <span className="text-sm font-semibold text-coral">The Journey</span>
-              </motion.div>
+            </motion.div>
 
               {/* Main headline */}
               <h1 className="text-6xl lg:text-7xl font-bold leading-tight">
@@ -408,8 +421,8 @@ export default function About() {
                       <span className="text-sm text-secondary">{item.org}</span>
                     </div>
                   </motion.div>
-                ))}
-              </div>
+              ))}
+            </div>
 
               {/* CTA Buttons */}
               <motion.div
@@ -427,17 +440,20 @@ export default function About() {
               </motion.div>
             </motion.div>
 
-            {/* RIGHT: Featured Image */}
-            <motion.div
+            {/* RIGHT: Featured Image - Premium Layered */}
+          <motion.div
               className="relative"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1.2, delay: 0.4 }}
             >
-              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl">
-                <img
-                  src="https://i.postimg.cc/x1jWS3FM/image.png"
-                  alt="Rashmi Agarwal"
+              {/* Decorative background frame */}
+              <div className="absolute inset-0 bg-gradient-to-br from-coral/20 to-sky/20 rounded-3xl blur-2xl scale-105 -z-10" />
+              
+              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/20">
+              <img
+                src="https://i.postimg.cc/x1jWS3FM/image.png"
+                  alt="Rashmi Agarwal - Cultural Visionary"
                   className="w-full h-full object-cover"
                 />
                 
@@ -468,8 +484,8 @@ export default function About() {
                     </div>
                   </motion.div>
                 </div>
-              </div>
-            </motion.div>
+            </div>
+          </motion.div>
           </div>
         </div>
       </section>
